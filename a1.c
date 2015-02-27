@@ -413,6 +413,11 @@ void openSocket() {
     
     listen(server_sockfd, 5);
     
+    /*  Accept a connection.  */
+    
+    client_len = sizeof(client_address);
+    client_sockfd = accept(server_sockfd,(struct sockaddr *)&client_address, &client_len);
+    
     //close(client_sockfd); //TESTING!!!!! - Should be moved to when the user hits the "q" key
 }
 
@@ -421,13 +426,22 @@ void writeSocket() {
     
     /*  Create a connection queue and wait for clients.  */
     
-    listen(server_sockfd, 5);
-    
+    //listen(server_sockfd, 5);
+   
     /*  Accept a connection.  */
     //client_len = sizeof(client_address);
+    //printf("client_len = %d \n", client_len);
     //client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+    //read(client_sockfd, &ch, 1);
+    printf("read a character from client %c\n", ch);
+    
     /*write to client*/
     //write(client_sockfd, &ch, 1);
+    
+    //read(client_sockfd, &ch, 1);
+    
+    /*write to client*/
+    write(client_sockfd, &ch, 1);
 }
 /**/
 /**/
