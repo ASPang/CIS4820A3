@@ -3,6 +3,8 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 
+#include <time.h>
+
         /* world size and storage array */
 #define WORLDX 100
 #define WORLDY 50
@@ -33,8 +35,14 @@ void updateCloudLoc();
 
 
 /*Functions for CIS4820 Assignment 2*/
-void updateProjectiles();
 void worldOrientation();
+void moveProjectile();
+void initProjectiles();
+void updateProjectiles();
+void objectCollision();
+void clearProjectile(int);
+void nextProjLoc(float *, float *, float, float, int );
+float nextProjHeight(float , float, float *);
 
-float calSpeed(int);
-float calAngle(int);
+float calSpeed(int, int);
+float calAngle(int, int);
