@@ -16,6 +16,9 @@
 
 #include "graphics.h"
 
+    /* Program Mode */
+char* gameMode;    //The game can be of one of two different states: -server or -client
+
     /* projectile Information */
 float projectile[10][10];  //dx, dy, velocity
 float projNumber=0;
@@ -368,9 +371,71 @@ void update() {
          /*Update the projectile*/
           moveProjectile();
           objectCollision();
+          
+          /*Write to socket*/
+          writeSocket();
       }
    }
 }
+
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+
+int server_sockfd, client_sockfd;
+int server_len, client_len;
+struct sockaddr_in server_address;
+struct sockaddr_in client_address;
+
+
+void openSocket() {
+    
+    
+    
+    /*  Remove any old socket and create an unnamed socket for the server.  */
+    
+    server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    
+    /*  Name the socket.  */
+    
+    server_address.sin_family = AF_INET;
+    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
+    server_address.sin_port = htons(9734);
+    server_len = sizeof(server_address);
+    bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
+    
+    /*  Create a connection queue and wait for clients.  */
+    
+    listen(server_sockfd, 5);
+    
+    //close(client_sockfd); //TESTING!!!!! - Should be moved to when the user hits the "q" key
+}
+
+void writeSocket() {
+    char ch;
+    
+    /*  Create a connection queue and wait for clients.  */
+    
+    listen(server_sockfd, 5);
+    
+    /*  Accept a connection.  */
+    //client_len = sizeof(client_address);
+    //client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
+    /*write to client*/
+    //write(client_sockfd, &ch, 1);
+}
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
 
 /*Pulls the view point(camera) down the gameworld*/
 void gravity() {
@@ -829,8 +894,19 @@ int i, j, k;
       /*Creates the game landscape*/
       landscape();
        
-       /*Initiate projectile array*/
-       initProjectiles();
+      /*Initiate projectile array*/
+      initProjectiles();
+       
+       /*Open up server connection*/
+       openSocket();
+       
+       printf("argc = %d\n", argc); //TESTING!!!!!
+       if (argc > 1) {
+           /*Set the flags according to if its a server or client*/
+           gameMode = argv[1];
+           printf("argv = %s and gamemode = %s \n", argv[1], gameMode); //TESTING!!!!!
+       }
+       
    }
 
 

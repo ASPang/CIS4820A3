@@ -3,7 +3,18 @@
 #include <OpenGL/glu.h>
 #include <GLUT/glut.h>
 
+/*Library used starting from Assignement 1-2*/
 #include <time.h>
+
+/*Library used for Assignment 3*/
+/* From Beginning Linux Programming, 4th edition, byt Matthew and Stone. */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <stdio.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <stdlib.h>
 
         /* world size and storage array */
 #define WORLDX 100
