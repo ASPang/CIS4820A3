@@ -372,8 +372,16 @@ void update() {
           moveProjectile();
           objectCollision();
           
-          /*Write to socket*/
-          writeSocket();
+         /*Determine if the program is a server or client*/
+          if (strcmp(gameMode,"-server") == 0) {
+              /*Write to socket*/
+              writeSocket();
+          }
+          else if(strcmp(gameMode,"-client") == 0) {
+              /*Write to socket*/
+              readSocket();
+          }
+         
       }
    }
 }
@@ -387,16 +395,19 @@ void update() {
 /**/
 /**/
 
+/*Server Socket Variable*/
 int server_sockfd, client_sockfd;
 int server_len, client_len;
 struct sockaddr_in server_address;
 struct sockaddr_in client_address;
 
+/*Client Socket Variable*/
+int sockfd;
+int len;
+struct sockaddr_in address;
 
-void openSocket() {
-    
-    
-    
+/*Open the socket as a server*/
+void openSocketServer() {
     /*  Remove any old socket and create an unnamed socket for the server.  */
     
     server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -421,6 +432,33 @@ void openSocket() {
     //close(client_sockfd); //TESTING!!!!! - Should be moved to when the user hits the "q" key
 }
 
+/*Open the socket as a client*/
+void openSocketClient() {
+    int result;
+    //char ch = 'A';
+    
+    /*  Create a socket for the client.  */
+    
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    
+    /*  Name the socket, as agreed with the server.  */
+    
+    address.sin_family = AF_INET;
+    address.sin_addr.s_addr = inet_addr("127.0.0.1");
+    address.sin_port = htons(9734);
+    len = sizeof(address);
+    
+    /*  Now connect our socket to the server's socket.  */
+    
+    result = connect(sockfd, (struct sockaddr *)&address, len);
+    
+    if(result == -1) {
+        perror("oops: client3");
+        exit(1);
+    }
+}
+
+/*Write information to socket that is sent to the client*/
 void writeSocket() {
     char ch;
     
@@ -442,6 +480,14 @@ void writeSocket() {
     
     /*write to client*/
     write(client_sockfd, &ch, 1);
+}
+
+/*Read the message from the socket sent by the server*/
+void readSocket() {
+    char ch = 'A';
+
+    read(sockfd, &ch, 1);
+
 }
 /**/
 /**/
@@ -912,13 +958,24 @@ int i, j, k;
       initProjectiles();
        
        /*Open up server connection*/
-       openSocket();
+       //openSocket();
        
        printf("argc = %d\n", argc); //TESTING!!!!!
        if (argc > 1) {
            /*Set the flags according to if its a server or client*/
            gameMode = argv[1];
            printf("argv = %s and gamemode = %s \n", argv[1], gameMode); //TESTING!!!!!
+           
+           /*Determine if the program is a server or client*/
+           if (strcmp(gameMode,"-server") == 0) {
+               /*Open socket as a server*/
+               openSocketServer();
+           }
+           else if(strcmp(gameMode,"-client") == 0) {
+               /*Open socket as a client*/
+               //readSocket();
+               openSocketClient();
+           }
        }
        
    }
