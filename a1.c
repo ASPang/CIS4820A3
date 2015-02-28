@@ -678,8 +678,10 @@ void readSocket() {
 
 }
 
+/*Parse the view position sent from the server*/
 void parseViewPos(char *msg) {
-   printf("parseViewPos = %s\n", msg);
+    //printf("parseViewPos = %s\n", msg);
+    int x = 0, y = 0, z = 0;
     int numMsg = 3;
     int msgLen = 10;
     
@@ -687,28 +689,36 @@ void parseViewPos(char *msg) {
     char ** msgSplit;
     
     /*Parse the message to the three coordinates*/
-    //strcpy(msgSplit, splitNumMsgInfo(msg, numMsg, msgLen));
     msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
     
-    /*TESTING*/
+    /*TESTING
     int i = 0;
     for (i = 0; i < numMsg; i++) {
-        printf("msgSplit[i] = %s  \n", msgSplit[i]);
-        //free(msgSplit[i]);
-    }
+        //printf("msgSplit[i] = %s  \n", msgSplit[i]);
+    }*/
+        
+    /*Convert string to an integer*/
+    x = atoi(msgSplit[0]) * -1;
+    y = atoi(msgSplit[1]) * -1;
+    z = atoi(msgSplit[2]) * -1;
+    
+    printf("x,y,z = %d, %d, %d \n", x, y, z);
+    
+    /*Set the client location based on the server's*/
+    setViewPosition(x, y, z);
+    
     
     free(*msgSplit);
     free(msgSplit);
 }
 
-
+/*Split the message to coordinate*/
 char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
    char** tokens;
    int i = 0;    //loop counters
    char delim[2] = ",";
-    //char msg[34] = "12312312312,312312,3123123";
-   //tokens = str_split(msg, ',');
-    printf("msgLen = %d \n", numMsg);
+    
+    //printf("msgLen = %d \n", numMsg);
     
     
     char ** msgSplit;
@@ -716,56 +726,28 @@ char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
     
     //char msgSplit[numMsg][msgLen];
     
-    printf("HERE\n");
+    //printf("HERE\n");
     
     char* token = strtok(msg, delim);
     //msgSplit[0] = (char*)malloc(msgLen*sizeof(token) + 10);
-    printf("first token = %s  \n ", token);
+    //printf("first token = %s  \n ", token);
     
     /*Go through all the tokens*/
     while (token != NULL) {
         if (token != NULL) {
-            printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
+            //printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
             msgSplit[i] = (char*)malloc(sizeof(char*) * sizeof(token) + 2);
             strcpy(msgSplit[i], token);    //Save the message
             
-            /*msgSplit[i] = NULL;
-            char* currentPtr = msgSplit[i];
-            free(currentPtr);*/
             i++;
         }
         
         token = strtok(NULL, delim);
         
     }
-    printf("---END\n");
+    //printf("---END\n");
     
-     
-    /*TESTING
-    for (i = 0; i < numMsg; i++) {
-        printf("msgSplit[i] = %s  \n", msgSplit[i]);
-        //free(msgSplit[i]);
-    }*/
-    
-    
-    
-    //free(msgSplit);
-    
-    /*
-    if (tokens) {
-        for (i = 0; i < *(tokens + i); i++) {
-            //printf("month=[%s]\n", *(tokens + i));
-            //Convert to integer
-            free(*(tokens + i));
-        }
-        printf("\n");
-        free(tokens);
-    }*/
-    
-    return msgSplit;
-    
-    printf("---end of function\n");
-    
+    return msgSplit;    
 }
 
 
@@ -1262,7 +1244,7 @@ int i, j, k;
                
                /*Read the seed that was passed over*/
                read(sockfd, &seed, seedLen);
-               landSeed = atoi(seed);
+               landSeed = atoi(seed);   //Convert string to an integer
                
                printf("Client - landscape seed = %d in str = %s\n", landSeed, seed);
            }
