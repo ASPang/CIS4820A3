@@ -464,8 +464,7 @@ void openSocketClient() {
 /*Write information to socket that is sent to the client*/
 void writeSocket() {
     char ch = 'A';
-    float x, y, z;
-    char strX[10], *strY, *strZ;
+    
     
     /*  Create a connection queue and wait for clients.  */
     
@@ -481,30 +480,16 @@ void writeSocket() {
     /*Determine if this is the first time client has connected to the server*/
         /*Send the perlin noise seed to the client*/
     
+    /*Send the server's current position*/
+    sendViewPos();
+    
+    /*Send servers' current view orientation*/
+    sendViewOrient();
     
     /*write to client*/
     write(client_sockfd, &ch, 1);
     
-    /*Send server's current position*/
-    getViewPosition(&x, &y, &z);
-    //printf("x,y,z = %f,%f,%f \n", x, y, z);
-    
-    /*Convert to a positive number*/
-    x = x * -1;
-    y = y * -1;
-    z = z * -1;
-    
-    printf("x,y,z = %f,%f,%f \n", x, y, z);
-    
-    /*Convert coordinates to a string*/
-    sprintf(strX, "%f", x);    //Convert integer to a string
-    
-    printf("strX %s\n", strX);
-    
-    /*Convert the three values into two digit string numbers - example 2 = "02" */
-    convertNumDigit(&strX);
-    
-    printf("NewStrX %s\n", strX);
+   
     
     /*Send server's orientation position - will be done last since this only happens when the mouse moves*/
     
@@ -514,8 +499,92 @@ void writeSocket() {
     printf("write a character to client %c\n", ch);
 }
 
+/*Send the server's current position*/
+void sendViewPos() {
+    char ch = 'S';
+    float x, y, z;
+    int cordLen = 10;
+    int msgLen = 34;
+    char strX[cordLen], strY[cordLen], strZ[cordLen], msgStr[msgLen];
+    
+    /*Inform the client that information being sent is viewPosition*/
+    write(client_sockfd, &ch, 1);
+    
+    /*Send server's current position*/
+    getViewPosition(&x, &y, &z);
+    
+    /*Convert to a positive number*/
+    x = x * -1;
+    y = y * -1;
+    z = z * -1;
+    
+    //printf("x,y,z = %f,%f,%f \n", x, y, z);
+    
+    /*Convert coordinates to a string*/
+    sprintf(strX, "%f", x);    //Convert integer to a string
+    sprintf(strY, "%f", y);    //Convert integer to a string
+    sprintf(strZ, "%f", z);    //Convert integer to a string
+    
+    //printf("strX %s\n", strX);
+    
+    /*Convert the three values into two digit string numbers - example 2 = "02" */
+    convertPosNumDigit(&strX);
+    convertPosNumDigit(&strY);
+    convertPosNumDigit(&strZ);
+    
+    /*Concate the message*/
+    strcpy(msgStr,""); //Set up message
+    strcat(msgStr, strX);
+    strcat(msgStr, ",");
+    strcat(msgStr, strY);
+    strcat(msgStr, ",");
+    strcat(msgStr, strZ);
+    
+    /*Send the message to client*/
+    write(client_sockfd, &msgStr, msgLen);
+    
+    //printf("NewStrX %s\n", strX);
+}
+
+/*Send the server's current view orientation*/
+void sendViewOrient() {
+    char ch = 'O';
+    float x, y, z;
+    int cordLen = 10;
+    int msgLen = 24;
+    char strX[cordLen], strY[cordLen], msgStr[msgLen];
+    
+    /*Inform the client that information being sent is viewPosition*/
+    write(client_sockfd, &ch, 1);
+    
+    /*Send server's current position*/
+    getViewOrientation(&x, &y, &z);
+    
+    printf("x,y,z = %f,%f,%f \n", x, y, z);
+    
+    /*Convert coordinates to a string*/
+    sprintf(strX, "%f", x);    //Convert integer to a string
+    sprintf(strY, "%f", y);    //Convert integer to a string
+    
+    //printf("strX %s\n", strX);
+    
+    /*Convert the three values into two digit string numbers - example 2 = "02" */
+    convertOrientNumDigit(&strX);
+    convertOrientNumDigit(&strY);
+    
+    /*Concate the message*/
+    strcpy(msgStr,""); //Set up message
+    strcat(msgStr, strX);
+    strcat(msgStr, ",");
+    strcat(msgStr, strY);    
+    
+    /*Send message to client*/
+    write(client_sockfd, &msgStr, msgLen);
+    
+}
+
 /*Convert the three values into two digit string numbers - example 2 = "02" */
-void convertNumDigit(char * str) {
+void convertPosNumDigit(char * str) {
     int strLen = 10;
     int i = 0;  //Loop counter
     char newStr[strLen];
@@ -537,11 +606,54 @@ void convertNumDigit(char * str) {
     }    
 }
 
+/*Converts the orientation to 6 digits*/
+void convertOrientNumDigit(char * str) {
+    int strLen = 12;
+    int i = 0, numZero = 0;  //Loop counter
+    char newStr[strLen];
+    
+    /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
+    if (str[4] != '.') {
+        /*Determine how many zeros to add to the front*/
+        for (i = 0; i < 4; i++) {
+            if (str[i] != '.') {
+               numZero++;
+            }
+            else {
+               break;
+            }
+        }
+        
+        /*Add zero at the front*/
+        for (i = 0; i < strLen; i++) {
+            if (i < numZero) {
+                newStr[i] = '0';
+            }
+            else {
+                newStr[i] = str[i-numZero];
+            }
+        }
+        
+        /*Replace old string with the new one*/
+        strcpy(str, newStr);
+    }    
+}
+
 /*Read the message from the socket sent by the server*/
 void readSocket() {
     char ch = 'A';
 
     read(sockfd, &ch, 1);
+    
+    if (ch == 'S') {
+      int msgLen = 34;
+      char msg[msgLen];
+      
+      /*Set position to be same as server*/
+      read(sockfd, &msg, msgLen);
+      
+    }
+    
     
     printf("read a character from server %c\n", ch);
     
@@ -549,6 +661,43 @@ void readSocket() {
     /*Convert to a negative number*/
 
 }
+
+void parseViewPos(char *msg, int len) {
+   
+   //splitNumMsgInfo(char *msg)
+
+}
+
+
+void splitNumMsgInfo(char *msg) {
+   char** tokens;
+   int i;
+   
+   tokens = str_split(msg, ',');
+
+   int msgSplit[*(tokens + i)];
+   
+    char* token = strtok(a_str, delim);
+
+        while (token)
+        {
+            assert(idx < count);
+            *(result + idx++) = strdup(token);
+            token = strtok(0, delim);
+        }
+        
+    if (tokens) {
+        for (i = 0; i < *(tokens + i); i++) {
+            //printf("month=[%s]\n", *(tokens + i));
+            /*Convert to integer*/
+            free(*(tokens + i));
+        }
+        printf("\n");
+        free(tokens);
+    }
+}
+
+
 /**/
 /**/
 /**/
