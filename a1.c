@@ -484,7 +484,7 @@ void writeSocket() {
     sendViewPos();
     
     /*Send servers' current view orientation*/
-    //sendViewOrient();
+    sendViewOrient();
     
     /*write to client*/
     //write(client_sockfd, &ch, 1);
@@ -529,9 +529,9 @@ void sendViewPos() {
     //printf("strX %s\n", strX);
     
     /*Convert the three values into two digit string numbers - example 2 = "02" */
-    convertPosNumDigit(&strX);
-    convertPosNumDigit(&strY);
-    convertPosNumDigit(&strZ);
+    convertPosNumDigit(strX);
+    convertPosNumDigit(strY);
+    convertPosNumDigit(strZ);
     
     /*Concate the message*/
     strcpy(msgStr,""); //Set up message
@@ -570,8 +570,8 @@ void sendViewOrient() {
     //printf("strX %s\n", strX);
     
     /*Convert the three values into two digit string numbers - example 2 = "02" */
-    convertOrientNumDigit(&strX);
-    convertOrientNumDigit(&strY);
+    convertOrientNumDigit(strX);
+    convertOrientNumDigit(strY);
     
     /*Concate the message*/
     strcpy(msgStr,""); //Set up message
@@ -680,25 +680,44 @@ void readSocket() {
 
 void parseViewPos(char *msg) {
    printf("parseViewPos = %s\n", msg);
+    int numMsg = 3;
+    int msgLen = 10;
+    
+    //char msgSplit[numMsg][msgLen];
+    char ** msgSplit;
+    
     /*Parse the message to the three coordinates*/
-    splitNumMsgInfo(msg, 3, 10);
-
+    //strcpy(msgSplit, splitNumMsgInfo(msg, numMsg, msgLen));
+    msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+    
+    /*TESTING*/
+    int i = 0;
+    for (i = 0; i < numMsg; i++) {
+        printf("msgSplit[i] = %s  \n", msgSplit[i]);
+        //free(msgSplit[i]);
+    }
+    
+    free(*msgSplit);
+    free(msgSplit);
 }
 
 
-void splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
+char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
    char** tokens;
    int i = 0;    //loop counters
    char delim[2] = ",";
     //char msg[34] = "12312312312,312312,3123123";
    //tokens = str_split(msg, ',');
-    printf("msgLen = %d \n", msgLen);
-    /*char ** msgSplit;
-    msgSplit = (char**)malloc(msgLen + 4);
-    */
-    char msgSplit[numMsg][msgLen];
+    printf("msgLen = %d \n", numMsg);
+    
+    
+    char ** msgSplit;
+    msgSplit = (char**)malloc(msgLen * sizeof(char**));
+    
+    //char msgSplit[numMsg][msgLen];
     
     printf("HERE\n");
+    
     char* token = strtok(msg, delim);
     //msgSplit[0] = (char*)malloc(msgLen*sizeof(token) + 10);
     printf("first token = %s  \n ", token);
@@ -707,7 +726,7 @@ void splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
     while (token != NULL) {
         if (token != NULL) {
             printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
-            //msgSplit[i] = (char*)malloc(msgLen*sizeof(token) + 2);
+            msgSplit[i] = (char*)malloc(sizeof(char*) * sizeof(token) + 2);
             strcpy(msgSplit[i], token);    //Save the message
             
             /*msgSplit[i] = NULL;
@@ -719,14 +738,15 @@ void splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
         token = strtok(NULL, delim);
         
     }
-    printf("\n");
+    printf("---END\n");
     
      
-    /*for (i = 0; i < msgLen; i++) {
+    /*TESTING
+    for (i = 0; i < numMsg; i++) {
         printf("msgSplit[i] = %s  \n", msgSplit[i]);
-        free(msgSplit[i]);
-    }
-    */
+        //free(msgSplit[i]);
+    }*/
+    
     
     
     //free(msgSplit);
@@ -741,6 +761,11 @@ void splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
         printf("\n");
         free(tokens);
     }*/
+    
+    return msgSplit;
+    
+    printf("---end of function\n");
+    
 }
 
 
