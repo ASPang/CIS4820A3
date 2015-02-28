@@ -23,6 +23,9 @@ char* gameMode;    //The game can be of one of two different states: -server or 
 float projectile[10][10];  //dx, dy, velocity
 float projNumber=0;
 
+    /* Landscape seed */
+int landSeed = 580789;
+
 	/* mouse function called by GLUT when a button is pressed or released */
 void mouse(int, int, int, int);
 
@@ -460,7 +463,7 @@ void openSocketClient() {
 
 /*Write information to socket that is sent to the client*/
 void writeSocket() {
-    char ch;
+    char ch = 'A';
     
     /*  Create a connection queue and wait for clients.  */
     
@@ -471,15 +474,23 @@ void writeSocket() {
     //printf("client_len = %d \n", client_len);
     //client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
     //read(client_sockfd, &ch, 1);
-    printf("read a character from client %c\n", ch);
     
-    /*write to client*/
-    //write(client_sockfd, &ch, 1);
+
+    /*Determine if this is the first time client has connected to the server*/
+        /*Send the perlin noise seed to the client*/
     
-    //read(client_sockfd, &ch, 1);
     
     /*write to client*/
     write(client_sockfd, &ch, 1);
+    
+    /*Send server's current position*/
+    
+    /*Send server's orientation position - will be done last since this only happens when the mouse moves*/
+    
+    /*Send any projectile information - again will be done last since this only happens when the mouse moves*/
+    
+    
+    printf("write a character to client %c\n", ch);
 }
 
 /*Read the message from the socket sent by the server*/
@@ -487,6 +498,8 @@ void readSocket() {
     char ch = 'A';
 
     read(sockfd, &ch, 1);
+    
+    printf("read a character from server %c\n", ch);
 
 }
 /**/
@@ -951,6 +964,43 @@ int i, j, k;
    } else {
 
 	/* your code to build the world goes here */
+       printf("argc = %d\n", argc); //TESTING!!!!!
+       if (argc > 1) {
+           int seedLen = 6;
+           char seed[seedLen];
+           
+           /*Set the flags according to if its a server or client*/
+           gameMode = argv[1];
+           printf("argv = %s and gamemode = %s \n", argv[1], gameMode); //TESTING!!!!!
+           
+           /*Determine if the program is a server or client*/
+           if (strcmp(gameMode,"-server") == 0) {
+               
+               /*Open socket as a server*/
+               openSocketServer();
+               
+               /*Generate a landscape seed*/
+               landSeed = (rand() % landSeed) + 400000;
+               
+               sprintf(seed, "%d", landSeed);    //Convert integer to a string
+               printf("Server - landscape seed = %d in str = %s\n", landSeed, seed);
+               
+               /*Send client the seed*/
+               write(client_sockfd, &seed, seedLen);
+           }
+           else if(strcmp(gameMode,"-client") == 0) {
+               /*Open socket as a client*/
+               //readSocket();
+               openSocketClient();
+               
+               /*Read the seed that was passed over*/
+               read(sockfd, &seed, seedLen);
+               landSeed = atoi(seed);
+               
+               printf("Client - landscape seed = %d in str = %s\n", landSeed, seed);
+           }
+       }
+       
       /*Creates the game landscape*/
       landscape();
        
@@ -960,23 +1010,7 @@ int i, j, k;
        /*Open up server connection*/
        //openSocket();
        
-       printf("argc = %d\n", argc); //TESTING!!!!!
-       if (argc > 1) {
-           /*Set the flags according to if its a server or client*/
-           gameMode = argv[1];
-           printf("argv = %s and gamemode = %s \n", argv[1], gameMode); //TESTING!!!!!
-           
-           /*Determine if the program is a server or client*/
-           if (strcmp(gameMode,"-server") == 0) {
-               /*Open socket as a server*/
-               openSocketServer();
-           }
-           else if(strcmp(gameMode,"-client") == 0) {
-               /*Open socket as a client*/
-               //readSocket();
-               openSocketClient();
-           }
-       }
+       
        
    }
 
@@ -1065,7 +1099,7 @@ void perlinNoise() {
    float perX, perZ;
   
    /*Random Generator Seed*/
-   srand(time(NULL));
+   srand(landSeed);
 
    // Initialize the permutation table
    for(i = 0; i < SIZE; i++)
