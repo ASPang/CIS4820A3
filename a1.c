@@ -464,6 +464,8 @@ void openSocketClient() {
 /*Write information to socket that is sent to the client*/
 void writeSocket() {
     char ch = 'A';
+    float x, y, z;
+    char strX[10], *strY, *strZ;
     
     /*  Create a connection queue and wait for clients.  */
     
@@ -484,6 +486,25 @@ void writeSocket() {
     write(client_sockfd, &ch, 1);
     
     /*Send server's current position*/
+    getViewPosition(&x, &y, &z);
+    //printf("x,y,z = %f,%f,%f \n", x, y, z);
+    
+    /*Convert to a positive number*/
+    x = x * -1;
+    y = y * -1;
+    z = z * -1;
+    
+    printf("x,y,z = %f,%f,%f \n", x, y, z);
+    
+    /*Convert coordinates to a string*/
+    sprintf(strX, "%f", x);    //Convert integer to a string
+    
+    printf("strX %s\n", strX);
+    
+    /*Convert the three values into two digit string numbers - example 2 = "02" */
+    convertNumDigit(&strX);
+    
+    printf("NewStrX %s\n", strX);
     
     /*Send server's orientation position - will be done last since this only happens when the mouse moves*/
     
@@ -493,6 +514,29 @@ void writeSocket() {
     printf("write a character to client %c\n", ch);
 }
 
+/*Convert the three values into two digit string numbers - example 2 = "02" */
+void convertNumDigit(char * str) {
+    int strLen = 10;
+    int i = 0;  //Loop counter
+    char newStr[strLen];
+    
+    /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
+    if (str[2] != '.') {
+        /*Add zero at the front*/
+        for (i = 0; i < strLen; i++) {
+            if (i == 0) {
+                newStr[i] = '0';
+            }
+            else {
+                newStr[i] = str[i-1];
+            }
+        }
+        
+        /*Replace old string with the new one*/
+        strcpy(str, newStr);
+    }    
+}
+
 /*Read the message from the socket sent by the server*/
 void readSocket() {
     char ch = 'A';
@@ -500,6 +544,9 @@ void readSocket() {
     read(sockfd, &ch, 1);
     
     printf("read a character from server %c\n", ch);
+    
+    /*Get the server current position*/
+    /*Convert to a negative number*/
 
 }
 /**/
