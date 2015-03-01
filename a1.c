@@ -17,9 +17,26 @@
 #include "graphics.h"
 
     /* Network Information */
-char* oldServerPos = "";
-//char oldServerPos[34] = "";
-char* oldServerOrient = "";
+// char* oldServerPos = "";
+// char oldServerPos[34] = "";
+// char* oldServerOrient = "";
+
+    /*Server Socket Variable**/
+extern int server_sockfd, client_sockfd;
+extern int server_len, client_len;
+extern struct sockaddr_in server_address;
+extern struct sockaddr_in client_address;
+
+/*Client Socket Variable*/
+extern int sockfd;
+extern int len;
+extern struct sockaddr_in address;
+
+
+    /*Client Socket Variable*/
+extern int sockfd;
+//int len;
+//struct sockaddr_in address;
 
     /* Program Mode */
 char* gameMode = "";    //The game can be of one of two different states: -server or -client
@@ -486,18 +503,6 @@ int oneSec2() {
 /**/
 /**/
 /**/
-/**/
-
-/*Server Socket Variable*/
-int server_sockfd, client_sockfd;
-int server_len, client_len;
-struct sockaddr_in server_address;
-struct sockaddr_in client_address;
-
-/*Client Socket Variable*/
-int sockfd;
-int len;
-struct sockaddr_in address;
 
 /*Open the socket as a server*/
 void openSocketServer() {
@@ -556,7 +561,7 @@ void writeSocket() {
     char ch = 'A';
     static oldX, oldY, oldZ;
     float x, y, z;
-        
+    
     /*Send the server's current position*/
     sendViewPos();
     
@@ -640,7 +645,7 @@ void sendViewOrient() {
     
     /*Convert coordinates to a string*/
     sprintf(strX, "%f", x);
-    sprintf(strY, "%f", y);    
+    sprintf(strY, "%f", y);
     
     //printf("strX %s\n", strX);
     
@@ -652,7 +657,7 @@ void sendViewOrient() {
     strcpy(msgStr,""); //Set up message
     strcat(msgStr, strX);
     strcat(msgStr, ",");
-    strcat(msgStr, strY);    
+    strcat(msgStr, strY);
     
     /*Send message to client*/
     write(client_sockfd, &msgStr, msgLen);
@@ -670,11 +675,11 @@ void sendProjectile(float speed, float angle) {
     
     /*Inform the client that information being sent is viewPosition*/
     write(client_sockfd, &ch, 1);
-        
+    
     /*Convert number to string*/
     sprintf(speedStr, "%f", speed);
     sprintf(angleStr, "%f", angle);
-   
+    
     /*Format string*/
     convertProjNumDigit(speedStr);
     convertProjNumDigit(angleStr);
@@ -711,7 +716,7 @@ void convertPosNumDigit(char * str) {
         
         /*Replace old string with the new one*/
         strcpy(str, newStr);
-    }    
+    }
 }
 
 /*Converts the orientation to 6 digits*/
@@ -725,10 +730,10 @@ void convertOrientNumDigit(char * str) {
         /*Determine how many zeros to add to the front*/
         for (i = 0; i < 4; i++) {
             if (str[i] != '.') {
-               numZero++;
+                numZero++;
             }
             else {
-               break;
+                break;
             }
         }
         
@@ -744,7 +749,7 @@ void convertOrientNumDigit(char * str) {
         
         /*Replace old string with the new one*/
         strcpy(str, newStr);
-    }    
+    }
 }
 
 /*Converts the orientation to 5 digit number*/
@@ -783,22 +788,22 @@ void convertProjNumDigit(char * str) {
 /*Read the message from the socket sent by the server*/
 void readSocket() {
     char ch = 'A';
-
+    
     read(sockfd, &ch, 1);
     
     if (ch == 'P') {
-      int msgLen = 34;
-      char msg[msgLen];
-      //printf("read a character from server %c\n", ch);
-      
-      /*Get the message*/
-      read(sockfd, &msg, msgLen);
-      
-      //printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
+        int msgLen = 34;
+        char msg[msgLen];
+        //printf("read a character from server %c\n", ch);
         
-      /*Set position to be same as server*/
-      parseViewPos(msg);
-              
+        /*Get the message*/
+        read(sockfd, &msg, msgLen);
+        
+        //printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
+        
+        /*Set position to be same as server*/
+        parseViewPos(msg);
+        
     }
     else if (ch == 'O') {
         int msgLen = 26;    //msg = aaaa.bbbbbb,xxxx.yyyyyy
@@ -818,13 +823,10 @@ void readSocket() {
         
         /*Get the message*/
         read(sockfd, &msg, msgLen);
-        //printf("read a character from server %c\n", ch);
-        printf("---msgfrom server %s\n", msg);
+        //printf("---msgfrom server %s\n", msg);
         
         /*Parse the projectile information*/
         parseProjectInfo(msg);
-        
-        
     }
 }
 
@@ -839,7 +841,7 @@ void parseViewPos(char *msg) {
     
     /*Parse the message to the three coordinates*/
     msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
-        
+    
     /*Convert string to an integer*/
     x = atoi(msgSplit[0]) * -1;
     y = atoi(msgSplit[1]) * -1;
@@ -861,7 +863,7 @@ void parseOrientPos(char *msg) {
     int msgLen = 10;
     
     char ** msgSplit;
-        
+    
     /*Parse the message to the two coordinates*/
     msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
     
@@ -983,13 +985,8 @@ void createClientProj(float speed, float angle) {
 
 /*Split the message to coordinate*/
 char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
-   //char** tokens;
-   int i = 0;    //loop counters
-   char delim[2] = ",";
-    
-    //printf("msgLen = %d \n", numMsg);
-    
-    
+    int i = 0;    //loop counters
+    char delim[2] = ",";
     char ** msgSplit;
     msgSplit = (char**)malloc(msgLen * sizeof(char**));
     
@@ -998,7 +995,6 @@ char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
     /*Go through all the tokens*/
     while (token != NULL) {
         if (token != NULL) {
-            //printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
             msgSplit[i] = (char*)malloc(sizeof(char*) * sizeof(token) + 2);
             strcpy(msgSplit[i], token);    //Save the message
             
@@ -1006,11 +1002,9 @@ char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
         }
         
         token = strtok(NULL, delim);
-        
     }
-    //printf("---END\n");
     
-    return msgSplit;    
+    return msgSplit;
 }
 
 
