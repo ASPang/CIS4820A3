@@ -807,26 +807,15 @@ void readSocket() {
       int msgLen = 34;
       char msg[msgLen];
       //printf("read a character from server %c\n", ch);
+      
       /*Get the message*/
       read(sockfd, &msg, msgLen);
-      //  printf("---msgfrom server %s\n", msg);
-        /*
-        oldServerPos = "";
-        char* oldServerOrient = "";*/
-        
-        //if (strcmp(oldServerPos, msg) != 0) {
-        //if (oldServerPos[33] == msg[33]) {
-            //strcpy(oldServerPos, msg);
-            //oldServerPos = msg;
-            printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
-            /*Set position to be same as server*/
-            parseViewPos(msg);
-        //}
-        //else {
-            //printf("No change\n");
-        //}
-        
       
+      //printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
+        
+      /*Set position to be same as server*/
+      parseViewPos(msg);
+              
     }
     else if (ch == 'O') {
         int msgLen = 26;    //msg = aaaa.bbbbbb,xxxx.yyyyyy
@@ -843,12 +832,12 @@ void readSocket() {
         
         /*Get the message*/
         read(sockfd, &msg, msgLen);
-        printf("read a character from server %c\n", ch);
+        //printf("read a character from server %c\n", ch);
+        printf("---msgfrom server %s\n", msg);
         
         /*Parse the projectile information*/
-        //parseProjectInfo(msg);
+        parseProjectInfo(msg);
         
-        printf("---msgfrom server %s\n", msg);
         
     }
     else {
@@ -869,37 +858,10 @@ void parseViewPos(char *msg) {
     int numMsg = 3;
     int msgLen = 10;
     
-    //char msgSplit[numMsg][msgLen];
     char ** msgSplit;
     
     /*Parse the message to the three coordinates*/
     msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
-    /*
-    int i = 0;
-    char delim[2] = ",";
-    char* token = strtok(msg, delim);*/
-    
-    /*Go through all the tokens
-    while (token != NULL) {
-        if (token != NULL) {
-            //printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
-            //msgSplit[i] = (char*)malloc(sizeof(char*) * sizeof(token) + 2);
-            strcpy(msgSplit[i], token);    //Save the message
-            
-            i++;
-        }
-        
-        token = strtok(NULL, delim);
-        
-    }*/
-    
-    
-    
-    /*TESTING
-    int i = 0;
-    for (i = 0; i < numMsg; i++) {
-        //printf("msgSplit[i] = %s  \n", msgSplit[i]);
-    }*/
         
     /*Convert string to an integer*/
     x = atoi(msgSplit[0]) * -1;
@@ -930,16 +892,10 @@ void parseProjectInfo(char *msg) {
     msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
     
     /*Convert string to an integer*/
-    /*x = atoi(msgSplit[0]) * -1;
-    y = atoi(msgSplit[1]) * -1;
-    z = atoi(msgSplit[2]) * -1;*/
-    speed = atoi(msgSplit[0]);
-    angle = atoi(msgSplit[1]);
+    speed = atof(msgSplit[0]);
+    angle = atof(msgSplit[1]);
     
-    /*Set the client location based on the server's
-    printf("x, y, z = %d, %d, %d \n", x, y, z);
-    setViewPosition(x, y, z);*/
-    
+    printf("HERE - speed and angle = %f, %f", speed, angle);
     /*Create the projectile*/
     createClientProj(speed, angle);
     
