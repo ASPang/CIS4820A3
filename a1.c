@@ -310,10 +310,10 @@ int screenHeight = 768;*/
       
       
       /*Draw a square to indicate the player's location on the map*/
-      drawPlayerToMap(mX1, mY1);
+      drawPlayerToMap(mX1, mY2);
       
       /*Draw the projectile*/
-      drawProjToMap();
+      //drawProjToMap();
       
       /*Draw the map area*/
       drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
@@ -353,7 +353,7 @@ void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize, int spaceBuf) {
 }
 
 /*Draw the player to the map*/
-void drawPlayerToMap(int mX1, int mY1) {
+void drawPlayerToMap(int mX, int mY) {
    /*Player Variables*/
    int pSize = 10; //Player size
    float x, y, z;
@@ -369,21 +369,93 @@ void drawPlayerToMap(int mX1, int mY1) {
    pX = (int)floor(z) * -1;
    pY = (int)floor(x) * -1;
    
-   mX1 += pX * 2; 
-   mY1 -= pY * 2;
+   /*mX += pX * 2; 
+   mY -= pY * 2;*/
+   /*mX = 0;
+   mY = 0*/
+   
+   mX += pX * 2;
+   //mY -= 220 - (pY * 2);
+   mY += pY * 2;
    
    //printf("player = mx1, my1 = %d, %d, %d, %d \n", mX1, mY1, mX1 + pSize, mY1 + pSize);
    /*Create a 20x20 pixel square and center it to represent the player*/
    set2Dcolour(green);
-   draw2Dbox(mX1 - pSize, mY1 - pSize, mX1 + pSize, mY1 + pSize); //draw2Dbox(int x1, int y1, int x2, int y2)
-   //draw2Dbox(mX1  + pSize, mY1 + pSize, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
+   draw2Dbox(mX - pSize, mY - pSize, mX + pSize, mY + pSize); //draw2Dbox(int x1, int y1, int x2, int y2)
+  
+
+  //draw2Dbox(mX1  + pSize, mY1 + pSize, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
    
    //draw2Dbox(100, 100, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
 }
 
 /*Draw any projectiles to the map*/
-void drawProjToMap() {
+void drawProjToMap(int mX, int mY) {
+   /*Player Variables*/
+   int pSize = 4; //projectile size
+   float x, y, z;
+   int pX, pY;
+   int i;   //Loop counters
+   
+   /*Colour Variable*/
+   GLfloat blue[] = {0.0, 0.0, 0.5, 0.5};
+      
+      
+      
+   for (i = 0; i < 10; i++) {
+      /*Get current projectile position*/
+      x = projectile[i][0];
+      y = projectile[i][1];
+      z = projectile[i][2];
+
+      if (x >= 0 && y >= 0 && z >= 0) {
+         /*Convert the location to positive integer*/
+         pX = (int)floor(z) * -1;
+         pY = (int)floor(x) * -1;
+         
+         mX += pX * 2; 
+         mY -= pY * 2;
+         
+         
+         // /*Update mob position - height*/        
+         // angleY = projectile[i][7];
+         // speed = projectile[i][8];
+         // gravity = projectile[i][9];
+         // height = nextProjHeight(angleY, speed, &gravity);
+         // yPos += height;
+
+         // /*Update mob position - plane*/        
+         // dx = projectile[i][3];
+         // dz = projectile[i][5];
+         // angleX = projectile[i][6];
+
+         // nextProjLoc(&xPos, &zPos, dx, dz, angleX);
+         
+         // /*Update the mob position in the world*/
+         // setMobPosition(i, xPos, yPos, zPos, 0);
+
+         // /*Show mob*/
+         // showMob(i);
+
+         // /*Save mob configuration on the plane*/
+         // projectile[i][0] = xPos;
+         // projectile[i][2] = zPos;
+
+         // /*Save mob configuration in flight*/
+         // projectile[i][1] = yPos;
+         // projectile[i][9] = gravity;
+      }            
+   }
+   
+   /*Get player's current position*/
+   // getViewPosition(&x, &y, &z);
+   
+   
+   
+   
+   
 }
+
 
 
 
@@ -709,52 +781,52 @@ void avoidCubeEdge() {
 
 /*UPdates the projectile overtime*/
 void moveProjectile() {
-    updateProjectiles();
+   updateProjectiles();
 }
 
 /*Show all the current projectils on the screen and upate their position*/
 void updateProjectiles() {
-    int i;
-    float dx, dz, dy, angleX, angleY;
-    float xPos, yPos, zPos;
-    float speed, height, gravity;
-    
-    for (i = 0; i < 10; i++) {
-        /*Get current projectile position*/
-        xPos = projectile[i][0];
-        yPos = projectile[i][1];
-        zPos = projectile[i][2];
-        
-        if (xPos >= 0) {
-            /*Update mob position - height*/        
-            angleY = projectile[i][7];
-            speed = projectile[i][8];
-            gravity = projectile[i][9];
-            height = nextProjHeight(angleY, speed, &gravity);
-            yPos += height;
-    
-            /*Update mob position - plane*/        
-            dx = projectile[i][3];
-            dz = projectile[i][5];
-            angleX = projectile[i][6];
-    
-            nextProjLoc(&xPos, &zPos, dx, dz, angleX);
-            
-            /*Update the mob position in the world*/
-            setMobPosition(i, xPos, yPos, zPos, 0);
-        
-            /*Show mob*/
-            showMob(i);
-    
-            /*Save mob configuration on the plane*/
-            projectile[i][0] = xPos;
-            projectile[i][2] = zPos;
-    
-            /*Save mob configuration in flight*/
-            projectile[i][1] = yPos;
-            projectile[i][9] = gravity;
-        }            
-    }
+   int i;
+   float dx, dz, dy, angleX, angleY;
+   float xPos, yPos, zPos;
+   float speed, height, gravity;
+
+   for (i = 0; i < 10; i++) {
+      /*Get current projectile position*/
+      xPos = projectile[i][0];
+      yPos = projectile[i][1];
+      zPos = projectile[i][2];
+
+      if (xPos >= 0) {
+         /*Update mob position - height*/        
+         angleY = projectile[i][7];
+         speed = projectile[i][8];
+         gravity = projectile[i][9];
+         height = nextProjHeight(angleY, speed, &gravity);
+         yPos += height;
+
+         /*Update mob position - plane*/        
+         dx = projectile[i][3];
+         dz = projectile[i][5];
+         angleX = projectile[i][6];
+
+         nextProjLoc(&xPos, &zPos, dx, dz, angleX);
+         
+         /*Update the mob position in the world*/
+         setMobPosition(i, xPos, yPos, zPos, 0);
+
+         /*Show mob*/
+         showMob(i);
+
+         /*Save mob configuration on the plane*/
+         projectile[i][0] = xPos;
+         projectile[i][2] = zPos;
+
+         /*Save mob configuration in flight*/
+         projectile[i][1] = yPos;
+         projectile[i][9] = gravity;
+      }            
+   }
 }
 
 
