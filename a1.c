@@ -370,17 +370,17 @@ void update() {
       /* your code goes here */
           /*Move the clouds*/
           moveCloud();
-                    
+                  
+          /*Update the projectile*/
+          moveProjectile();
+          objectCollision();
+          
          /*Determine if the program is a server or client*/
           if (strcmp(gameMode,"-server") == 0) {
               /*Determine if the fly control is on or off*/
               if (flycontrol == 0) {
                   gravity();
               }
-              
-              /*Update the projectile*/
-              moveProjectile();
-              objectCollision();
               
               if (oneSec2()) {
                   /*Write to socket*/
@@ -576,6 +576,8 @@ void writeSocket() {
     /*Send servers' current view orientation*/
     sendViewOrient();
     
+    
+    
     /*write to client*/
     //write(client_sockfd, &ch, 1);
     
@@ -651,11 +653,11 @@ void sendViewOrient() {
     /*Send server's current position*/
     getViewOrientation(&x, &y, &z);
     
-    printf("x,y,z = %f,%f,%f \n", x, y, z);
+    //printf("x,y,z = %f,%f,%f \n", x, y, z);
     
     /*Convert coordinates to a string*/
-    sprintf(strX, "%f", x);    //Convert integer to a string
-    sprintf(strY, "%f", y);    //Convert integer to a string
+    sprintf(strX, "%f", x);
+    sprintf(strY, "%f", y);    
     
     //printf("strX %s\n", strX);
     
@@ -672,6 +674,38 @@ void sendViewOrient() {
     /*Send message to client*/
     write(client_sockfd, &msgStr, msgLen);
     printf("ori - msgStr sent %s\n", msgStr);
+}
+
+/*Send information about projectile fired*/
+void sendProjectile(float speed, float angle) {
+    char ch = 'M';
+    //float x, y, z;
+    int cordLen = 6;
+    int msgLen = 12;    //Might want to increment by one (13)
+    char speedStr[cordLen], angleStr[cordLen];
+    char  msgStr[msgLen];
+    
+    /*Inform the client that information being sent is viewPosition*/
+    write(client_sockfd, &ch, 1);
+        
+    /*Convert number to string*/
+    sprintf(speedStr, "%f", speed);
+    sprintf(angleStr, "%f", angle);
+   
+    /*Format string*/
+    convertProjNumDigit(speedStr);
+    convertProjNumDigit(angleStr);
+    
+    /*Concate the message*/
+    strcpy(msgStr,""); //Set up message
+    strcat(msgStr, speedStr);
+    strcat(msgStr, ",");
+    strcat(msgStr, angleStr);
+    
+    /*Send message to client*/
+    write(client_sockfd, &msgStr, msgLen);
+    
+    printf("pro - msgStr sent %s\n", msgStr);
 }
 
 /*Convert the three values into two digit string numbers - example 2 = "02" */
@@ -730,6 +764,39 @@ void convertOrientNumDigit(char * str) {
     }    
 }
 
+/*Converts the orientation to 5 digit number*/
+void convertProjNumDigit(char * str) {
+    int strLen = 6;
+    int i = 0, numZero = 0;  //Loop counter
+    char newStr[strLen];
+    
+    /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
+    if (str[2] != '.') {
+        /*Determine how many zeros to add to the front*/
+        for (i = 0; i < 2; i++) {
+            if (str[i] != '.') {
+                numZero++;
+            }
+            else {
+                break;
+            }
+        }
+        
+        /*Add zero at the front*/
+        for (i = 0; i < strLen; i++) {
+            if (i < numZero) {
+                newStr[i] = '0';
+            }
+            else {
+                newStr[i] = str[i-numZero];
+            }
+        }
+        
+        /*Replace old string with the new one*/
+        strcpy(str, newStr);
+    }
+}
+
 /*Read the message from the socket sent by the server*/
 void readSocket() {
     char ch = 'A';
@@ -770,6 +837,20 @@ void readSocket() {
         //printf("---msgfrom server %s\n", msg);
         
     }
+    else if (ch == 'M') {
+        int msgLen = 12;
+        char msg[msgLen];
+        
+        /*Get the message*/
+        read(sockfd, &msg, msgLen);
+        printf("read a character from server %c\n", ch);
+        
+        /*Parse the projectile information*/
+        //parseProjectInfo(msg);
+        
+        printf("---msgfrom server %s\n", msg);
+        
+    }
     else {
     
         //printf("in else - read a character from server %c\n", ch);
@@ -788,17 +869,17 @@ void parseViewPos(char *msg) {
     int numMsg = 3;
     int msgLen = 10;
     
-    char msgSplit[numMsg][msgLen];
-    //char ** msgSplit;
+    //char msgSplit[numMsg][msgLen];
+    char ** msgSplit;
     
     /*Parse the message to the three coordinates*/
-    //msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
-    
+    msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+    /*
     int i = 0;
     char delim[2] = ",";
-    char* token = strtok(msg, delim);
+    char* token = strtok(msg, delim);*/
     
-    /*Go through all the tokens*/
+    /*Go through all the tokens
     while (token != NULL) {
         if (token != NULL) {
             //printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
@@ -810,7 +891,7 @@ void parseViewPos(char *msg) {
         
         token = strtok(NULL, delim);
         
-    }
+    }*/
     
     
     
@@ -830,8 +911,117 @@ void parseViewPos(char *msg) {
     setViewPosition(x, y, z);
     
     
-    /*free(*msgSplit);
-    free(msgSplit);*/
+    free(*msgSplit);
+    free(msgSplit);
+}
+
+/*Parse the information about the projectile*/
+void parseProjectInfo(char *msg) {
+    //printf("parseViewPos = %s\n", msg);
+    //int x = 0, y = 0, z = 0;
+    int numMsg = 3;
+    int msgLen = 10;
+    
+    float speed = 0.0, angle = 0.0;
+    
+    char ** msgSplit;
+    
+    /*Parse the message to the three coordinates*/
+    msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+    
+    /*Convert string to an integer*/
+    /*x = atoi(msgSplit[0]) * -1;
+    y = atoi(msgSplit[1]) * -1;
+    z = atoi(msgSplit[2]) * -1;*/
+    speed = atoi(msgSplit[0]);
+    angle = atoi(msgSplit[1]);
+    
+    /*Set the client location based on the server's
+    printf("x, y, z = %d, %d, %d \n", x, y, z);
+    setViewPosition(x, y, z);*/
+    
+    /*Create the projectile*/
+    createClientProj(speed, angle);
+    
+    free(*msgSplit);
+    free(msgSplit);
+}
+
+/*Create new projectile in the client world*/
+void createClientProj(float speed, float angle) {
+    float xPos, yPos, zPos;
+    //static int oldMouPosX, oldMouPosY;
+    //static int oldX, oldY, oldZ;
+    //float xPos, yPos, zPos;
+    float xaxis, yaxis, zaxis;
+    int reminder, projNum;
+    float hor, height;
+    float dx, dz;
+    //static float speed, angle;
+    int orientAngle;
+    float radian;
+    
+    /*Get the current position*/
+    getViewPosition(&xPos, &yPos, &zPos);
+    
+    /*Determine player orientation*/
+    getViewOrientation(&xaxis, &yaxis, &zaxis);
+    reminder = abs((int)yaxis) % 360;
+    
+    /*Convert position to be positive for the projectile*/
+    xPos *= -1;
+    yPos *= -1;
+    zPos *= -1;
+    
+    radian = angle * M_PI / 180.0f;  //convert to radian
+    height = sin(radian)*(speed);
+    hor = cos(radian)* (speed);
+    
+    /*Determine if the projectile angle is 90 degrees*/
+    if (angle >= 90) {
+        /*Orientation direction*/
+        dz = 0;
+        dx = 0;
+    }
+    else {
+        orientAngle = reminder % 90;
+        radian = orientAngle * M_PI / 180.0f;  //convert to radian
+        
+        /*Orientation direction*/
+        dz = sin(radian) * hor;
+        dx = cos(radian) * hor;
+        
+    }
+    
+    /*Determine what quadrant it's in*/
+    nextProjLoc(&xPos, &zPos, dx, dz, reminder);
+    
+    /*Create the mob*/
+    //yPos += 0.2;
+    projNum = projNumber;
+    createMob(projNum, xPos, yPos, zPos, 0);
+    showMob(projNum);
+    
+    /*Save mob configuration on the plane*/
+    projectile[projNum][0] = xPos;
+    projectile[projNum][2] = zPos;
+    projectile[projNum][3] = dx;
+    projectile[projNum][5] = dz;
+    projectile[projNum][6] = (float)reminder;
+    
+    /*Save mob configuration in flight*/
+    projectile[projNum][1] = yPos;
+    projectile[projNum][7] = (float)angle;
+    projectile[projNum][8] = (float)speed;
+    projectile[projNum][9] = 0.0;
+    
+    /*Determine the number of projectiles in the world*/
+    if (projNumber + 1 > 9) {
+        projNumber = 0;
+    }
+    else {
+        projNumber++;   //Increase projectile number
+    }
 }
 
 /*Split the message to coordinate*/
@@ -865,6 +1055,7 @@ char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
     
     return msgSplit;    
 }
+
 
 
 /**/
@@ -1124,7 +1315,10 @@ void mouse(int button, int state, int x, int y) {
     float radian;
     
     /*Determine the mouse action*/
-    if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {        
+    if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
+        /*Send the client of the new projectile*/
+        sendProjectile(speed, angle);
+        
         /*Get the current position*/
         getViewPosition(&xPos, &yPos, &zPos);
         
@@ -1188,7 +1382,8 @@ void mouse(int button, int state, int x, int y) {
         }
         
         /*Inform the User of the new angle set*/
-        printf("Shot Projectile at: \nAngle = %0.2f and Speed =%0.2f\n ------\n", angle, speed);  
+        printf("Shot Projectile at: \nAngle = %0.2f and Speed =%0.2f\n ------\n", angle, speed);
+        
     }
     else if (state == GLUT_DOWN && button == GLUT_RIGHT_BUTTON) {        
         /*Save the orientation information*/
