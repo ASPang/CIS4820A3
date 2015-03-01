@@ -554,41 +554,24 @@ void openSocketClient() {
 /*Write information to socket that is sent to the client*/
 void writeSocket() {
     char ch = 'A';
-    
-    
-    /*  Create a connection queue and wait for clients.  */
-    
-    //listen(server_sockfd, 5);
-   
-    /*  Accept a connection.  */
-    //client_len = sizeof(client_address);
-    //printf("client_len = %d \n", client_len);
-    //client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_address, &client_len);
-    //read(client_sockfd, &ch, 1);
-    
-
-    /*Determine if this is the first time client has connected to the server*/
-        /*Send the perlin noise seed to the client*/
-    
+    static oldX, oldY, oldZ;
+    float x, y, z;
+        
     /*Send the server's current position*/
     sendViewPos();
     
-    /*Send servers' current view orientation*/
-    sendViewOrient();
+    /*Determine if the orientation is any different*/
+    getViewOrientation(&x,&y,&z);   //Get the current view orientation
     
-    
-    
-    /*write to client*/
-    //write(client_sockfd, &ch, 1);
-    
-   
-    
-    /*Send server's orientation position - will be done last since this only happens when the mouse moves*/
-    
-    /*Send any projectile information - again will be done last since this only happens when the mouse moves*/
-    
-    
-    //printf("write a character to client %c\n", ch);
+    if (oldX != x || oldY != y  || oldZ != z ) {
+        /*Send server's current view orientation*/
+        sendViewOrient();
+        
+        /*Save the updated orientation*/
+        oldX = x;
+        oldY = y;
+        oldZ = z;
+    }
 }
 
 /*Send the server's current position*/
@@ -823,6 +806,9 @@ void readSocket() {
         //printf("read a character from server %c\n", ch);
         /*Get the message*/
         read(sockfd, &msg, msgLen);
+        
+        /*Parse the orientation information from the server*/
+        parseOrientPos(msg);
         //printf("---msgfrom server %s\n", msg);
         
     }
@@ -840,15 +826,6 @@ void readSocket() {
         
         
     }
-    else {
-    
-        //printf("in else - read a character from server %c\n", ch);
-    }
-    
-    
-    /*Get the server current position*/
-    /*Convert to a negative number*/
-
 }
 
 /*Parse the view position sent from the server*/
@@ -869,18 +846,41 @@ void parseViewPos(char *msg) {
     z = atoi(msgSplit[2]) * -1;
     
     /*Set the client location based on the server's*/
-    printf("x, y, z = %d, %d, %d \n", x, y, z);
+    //printf("pos - x, y, z = %d, %d, %d \n", x, y, z);
     setViewPosition(x, y, z);
     
-    
+    /*Free memory for array*/
     free(*msgSplit);
     free(msgSplit);
 }
 
+/*Parse the orientation information from the server*/
+void parseOrientPos(char *msg) {
+    int x = 0, y = 0, z = 0;
+    int numMsg = 3;
+    int msgLen = 10;
+    
+    char ** msgSplit;
+        
+    /*Parse the message to the two coordinates*/
+    msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+    
+    /*Convert string to an integer*/
+    x = atoi(msgSplit[0]);
+    y = atoi(msgSplit[1]);
+    
+    /*Set the client location based on the server's*/
+    //printf("ori - x, y, z = %d, %d, %d \n", x, y, z);
+    setViewOrientation(x, y, z);
+    
+    /*Free memory for array*/
+    free(*msgSplit);
+    free(msgSplit);
+    
+}
+
 /*Parse the information about the projectile*/
 void parseProjectInfo(char *msg) {
-    //printf("parseViewPos = %s\n", msg);
-    //int x = 0, y = 0, z = 0;
     int numMsg = 3;
     int msgLen = 10;
     
@@ -895,10 +895,11 @@ void parseProjectInfo(char *msg) {
     speed = atof(msgSplit[0]);
     angle = atof(msgSplit[1]);
     
-    printf("HERE - speed and angle = %f, %f", speed, angle);
+    //printf("HERE - speed and angle = %f, %f", speed, angle);
     /*Create the projectile*/
     createClientProj(speed, angle);
     
+    /*Free memory for array*/
     free(*msgSplit);
     free(msgSplit);
 }

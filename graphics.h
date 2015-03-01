@@ -72,6 +72,11 @@ void convertOrientNumDigit(char *);
 
 void readSocket();
 void parseViewPos(char *);
+void parseOrientPos(char *);
+void parseProjectInfo(char *);
+
+void createClientProj(float , float );
+void convertProjNumDigit(char *);
 
 
 char ** splitNumMsgInfo(char *, int, int);
