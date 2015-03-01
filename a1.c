@@ -281,10 +281,119 @@ void draw2D() {
    } else {
 
 	/* your code goes here */
-
+      /*Map variables*/      
+      int mSize = 220;  //Map size with a space buffer of 20
+      int spaceBuf = 20;   //Map space buffer
+   
+      int mX1 = screenWidth - mSize;
+      int mY1 = screenHeight - spaceBuf;
+      int mX2 = screenWidth - spaceBuf;
+      int mY2 = screenHeight - mSize;
+      
+      
+      
+      
+      /*screenWidth and screenHeight*/
+      /*w  = 1024;
+int screenHeight = 768;*/
+      
+      
+      
+      //printf("displayMap =  %d \n", displayMap);   //TESTING!!!!!!!!!!!!
+      /*Determine what kind of map to display*/
+      if (displayMap == 0) {  //No map
+      }
+      else if (displayMap == 1) {   //Small  upper right corner map - default
+      }
+      else if (displayMap == 2) {   //Large map in the middle
+      }
+      
+      
+      /*Draw a square to indicate the player's location on the map*/
+      drawPlayerToMap(mX1, mY1);
+      
+      /*Draw the projectile*/
+      drawProjToMap();
+      
+      /*Draw the map area*/
+      drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
    }
 
 }
+
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+
+/*Draws the map area and its boarder*/
+void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize, int spaceBuf) {
+   int lineWidth = 5;   //Map boarder width
+   
+   /*Colour Variables*/
+   GLfloat black[] = {0.0, 0.0, 0.0, 0.8};
+   GLfloat grey[] = {0.0, 0.0, 0.0, 0.5};
+      
+   /*Draw lines to indicate the boundary of the map*/
+   set2Dcolour(black);
+   //draw2Dline(int x1, int y1, int x2, int y2, int lineWidth)
+   draw2Dline(mX1 - lineWidth, mY1, mX1 + (mSize - spaceBuf + lineWidth), mY1, lineWidth);   //Top boarder
+   draw2Dline(mX1 - lineWidth, mY2, mX1 + (mSize - spaceBuf + lineWidth), mY2, lineWidth);   //Bottom boarder
+   
+   draw2Dline(mX1 - lineWidth/2, mY1, mX1 - lineWidth/2, mY1 - (mSize - spaceBuf), lineWidth);   //Left boarder
+   draw2Dline(mX2 + (lineWidth/2 + 1), mY1, mX2 + (lineWidth/2 + 1), mY1 - (mSize - spaceBuf), lineWidth);   //Right boarder
+   
+   /*Draw the map area**/
+   set2Dcolour(grey);
+   draw2Dbox(mX1, mY1, mX2, mY2); //draw2Dbox(int x1, int y1, int x2, int y2)
+   //printf("mx1, my1, x2,y2 = %d, %d, %d, %d \n", mX1, mY1, mX2, mY2);
+}
+
+/*Draw the player to the map*/
+void drawPlayerToMap(int mX1, int mY1) {
+   /*Player Variables*/
+   int pSize = 10; //Player size
+   float x, y, z;
+   int pX, pY;
+   
+   /*Colour Variable*/
+   GLfloat green[] = {0.0, 0.5, 0.0, 0.5};
+      
+   /*Get player's current position*/
+   getViewPosition(&x, &y, &z);
+   
+   /*Convert the location to positive integer*/
+   pX = (int)floor(z) * -1;
+   pY = (int)floor(x) * -1;
+   
+   mX1 += pX * 2; 
+   mY1 -= pY * 2;
+   
+   //printf("player = mx1, my1 = %d, %d, %d, %d \n", mX1, mY1, mX1 + pSize, mY1 + pSize);
+   /*Create a 20x20 pixel square and center it to represent the player*/
+   set2Dcolour(green);
+   draw2Dbox(mX1 - pSize, mY1 - pSize, mX1 + pSize, mY1 + pSize); //draw2Dbox(int x1, int y1, int x2, int y2)
+   //draw2Dbox(mX1  + pSize, mY1 + pSize, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
+   
+   //draw2Dbox(100, 100, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
+}
+
+/*Draw any projectiles to the map*/
+void drawProjToMap() {
+}
+
+
+
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
+/**/
 
 
 /* 
@@ -399,18 +508,18 @@ void update() {
       /* your code goes here */
           /*Move the clouds*/
           moveCloud();
-               
+
           /*Update the projectile*/
           moveProjectile();
           objectCollision();
           
+          /*Determine if the fly control is on or off*/
+          if (flycontrol == 0 && strcmp(gameMode,"-client") != 0) {
+               gravity();
+          }
+          
          /*Determine if the program is a server or client*/
           if (strcmp(gameMode,"-server") == 0) {
-              /*Determine if the fly control is on or off*/
-              if (flycontrol == 0) {
-                  gravity();
-              }
-              
               if (oneSec2()) {
                   /*Write to socket*/
                   writeSocket();
@@ -520,512 +629,6 @@ int oneSec2() {
 /**/
 /**/
 /**/
-
- // /*Open the socket as a server*/
-// void openSocketServer() {
-    // /*  Remove any old socket and create an unnamed socket for the server.  */
-    
-    // server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    
-    // /*  Name the socket.  */
-    
-    // server_address.sin_family = AF_INET;
-    // server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    // server_address.sin_port = htons(9734);
-    // server_len = sizeof(server_address);
-    // bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
-    
-    // /*  Create a connection queue and wait for clients.  */
-    
-    // listen(server_sockfd, 5);
-    
-    // /*  Accept a connection.  */
-    
-    // client_len = sizeof(client_address);
-    // client_sockfd = accept(server_sockfd,(struct sockaddr *)&client_address, &client_len);
-    
-    // //close(client_sockfd); //TESTING!!!!! - Should be moved to when the user hits the "q" key
-// }
-
-// /*Open the socket as a client*/
-// void openSocketClient() {
-    // int result;
-    // //char ch = 'A';
-    
-    // /*  Create a socket for the client.  */
-    
-    // sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    
-    // /*  Name the socket, as agreed with the server.  */
-    
-    // address.sin_family = AF_INET;
-    // address.sin_addr.s_addr = inet_addr("127.0.0.1");
-    // address.sin_port = htons(9734);
-    // len = sizeof(address);
-    
-    // /*  Now connect our socket to the server's socket.  */
-    
-    // result = connect(sockfd, (struct sockaddr *)&address, len);
-    
-    // if(result == -1) {
-        // perror("oops: client3");
-        // exit(1);
-    // }
-// }
-
-// /*Write information to socket that is sent to the client*/
-// void writeSocket() {
-    // char ch = 'A';
-    // static oldX, oldY, oldZ;
-    // float x, y, z;
-    
-    // /*Send the server's current position*/
-    // sendViewPos();
-    
-    // /*Determine if the orientation is any different*/
-    // getViewOrientation(&x,&y,&z);   //Get the current view orientation
-    
-    // if (oldX != x || oldY != y  || oldZ != z ) {
-        // /*Send server's current view orientation*/
-        // sendViewOrient();
-        
-        // /*Save the updated orientation*/
-        // oldX = x;
-        // oldY = y;
-        // oldZ = z;
-    // }
-// }
-
-// /*Send the server's current position*/
-// void sendViewPos() {
-    // char ch = 'P';
-    // float x, y, z;
-    // int cordLen = 10;
-    // int msgLen = 34;
-    // char strX[cordLen], strY[cordLen], strZ[cordLen], msgStr[msgLen];
-    
-    // /*Inform the client that information being sent is viewPosition*/
-    // write(client_sockfd, &ch, 1);
-    // //write(client_sockfd, '\0', 1);
-    
-    // /*Send server's current position*/
-    // getViewPosition(&x, &y, &z);
-    
-    // /*Convert to a positive number*/
-    // x = x * -1;
-    // y = y * -1;
-    // z = z * -1;
-    
-    // //printf("x,y,z = %f,%f,%f \n", x, y, z);
-    
-    // /*Convert coordinates to a string*/
-    // sprintf(strX, "%f", x);    //Convert integer to a string
-    // sprintf(strY, "%f", y);    //Convert integer to a string
-    // sprintf(strZ, "%f", z);    //Convert integer to a string
-    
-    // //printf("strX %s\n", strX);
-    
-    // /*Convert the three values into two digit string numbers - example 2 = "02" */
-    // convertPosNumDigit(strX);
-    // convertPosNumDigit(strY);
-    // convertPosNumDigit(strZ);
-    
-    // /*Concate the message*/
-    // strcpy(msgStr,""); //Set up message
-    // strcat(msgStr, strX);
-    // strcat(msgStr, ",");
-    // strcat(msgStr, strY);
-    // strcat(msgStr, ",");
-    // strcat(msgStr, strZ);
-    
-    // /*Send the message to client*/
-    // write(client_sockfd, &msgStr, msgLen);
-    
-    // printf("msgStr sent %s\n", msgStr);
-// }
-
-// /*Send the server's current view orientation*/
-// void sendViewOrient() {
-    // char ch = 'O';
-    // float x, y, z;
-    // int cordLen = 10;
-    // int msgLen = 26;
-    // char strX[cordLen], strY[cordLen], msgStr[msgLen];
-    
-    // /*Inform the client that information being sent is viewPosition*/
-    // write(client_sockfd, &ch, 1);
-    
-    // /*Send server's current position*/
-    // getViewOrientation(&x, &y, &z);
-    
-    // //printf("x,y,z = %f,%f,%f \n", x, y, z);
-    
-    // /*Convert coordinates to a string*/
-    // sprintf(strX, "%f", x);
-    // sprintf(strY, "%f", y);
-    
-    // //printf("strX %s\n", strX);
-    
-    // /*Convert the three values into two digit string numbers - example 2 = "02" */
-    // convertOrientNumDigit(strX);
-    // convertOrientNumDigit(strY);
-    
-    // /*Concate the message*/
-    // strcpy(msgStr,""); //Set up message
-    // strcat(msgStr, strX);
-    // strcat(msgStr, ",");
-    // strcat(msgStr, strY);
-    
-    // /*Send message to client*/
-    // write(client_sockfd, &msgStr, msgLen);
-    // printf("ori - msgStr sent %s\n", msgStr);
-// }
-
-// /*Send information about projectile fired*/
-// void sendProjectile(float speed, float angle) {
-    // char ch = 'M';
-    // //float x, y, z;
-    // int cordLen = 6;
-    // int msgLen = 12;    //Might want to increment by one (13)
-    // char speedStr[cordLen], angleStr[cordLen];
-    // char  msgStr[msgLen];
-    
-    // /*Inform the client that information being sent is viewPosition*/
-    // write(client_sockfd, &ch, 1);
-    
-    // /*Convert number to string*/
-    // sprintf(speedStr, "%f", speed);
-    // sprintf(angleStr, "%f", angle);
-    
-    // /*Format string*/
-    // convertProjNumDigit(speedStr);
-    // convertProjNumDigit(angleStr);
-    
-    // /*Concate the message*/
-    // strcpy(msgStr,""); //Set up message
-    // strcat(msgStr, speedStr);
-    // strcat(msgStr, ",");
-    // strcat(msgStr, angleStr);
-    
-    // /*Send message to client*/
-    // write(client_sockfd, &msgStr, msgLen);
-    
-    // printf("pro - msgStr sent %s\n", msgStr);
-// }
-
-// /*Convert the three values into two digit string numbers - example 2 = "02" */
-// void convertPosNumDigit(char * str) {
-    // int strLen = 10;
-    // int i = 0;  //Loop counter
-    // char newStr[strLen];
-    
-    // /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
-    // if (str[2] != '.') {
-        // /*Add zero at the front*/
-        // for (i = 0; i < strLen; i++) {
-            // if (i == 0) {
-                // newStr[i] = '0';
-            // }
-            // else {
-                // newStr[i] = str[i-1];
-            // }
-        // }
-        
-        // /*Replace old string with the new one*/
-        // strcpy(str, newStr);
-    // }
-// }
-
-// /*Converts the orientation to 6 digits*/
-// void convertOrientNumDigit(char * str) {
-    // int strLen = 12;
-    // int i = 0, numZero = 0;  //Loop counter
-    // char newStr[strLen];
-    
-    // /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
-    // if (str[4] != '.') {
-        // /*Determine how many zeros to add to the front*/
-        // for (i = 0; i < 4; i++) {
-            // if (str[i] != '.') {
-                // numZero++;
-            // }
-            // else {
-                // break;
-            // }
-        // }
-        
-        // /*Add zero at the front*/
-        // for (i = 0; i < strLen; i++) {
-            // if (i < numZero) {
-                // newStr[i] = '0';
-            // }
-            // else {
-                // newStr[i] = str[i-numZero];
-            // }
-        // }
-        
-        // /*Replace old string with the new one*/
-        // strcpy(str, newStr);
-    // }
-// }
-
-// /*Converts the orientation to 5 digit number*/
-// void convertProjNumDigit(char * str) {
-    // int strLen = 6;
-    // int i = 0, numZero = 0;  //Loop counter
-    // char newStr[strLen];
-    
-    // /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
-    // if (str[2] != '.') {
-        // /*Determine how many zeros to add to the front*/
-        // for (i = 0; i < 2; i++) {
-            // if (str[i] != '.') {
-                // numZero++;
-            // }
-            // else {
-                // break;
-            // }
-        // }
-        
-        // /*Add zero at the front*/
-        // for (i = 0; i < strLen; i++) {
-            // if (i < numZero) {
-                // newStr[i] = '0';
-            // }
-            // else {
-                // newStr[i] = str[i-numZero];
-            // }
-        // }
-        
-        // /*Replace old string with the new one*/
-        // strcpy(str, newStr);
-    // }
-// }
-
-// /*Read the message from the socket sent by the server*/
-// void readSocket() {
-    // char ch = 'A';
-    
-    // read(sockfd, &ch, 1);
-    
-    // if (ch == 'P') {
-        // int msgLen = 34;
-        // char msg[msgLen];
-        // //printf("read a character from server %c\n", ch);
-        
-        // /*Get the message*/
-        // read(sockfd, &msg, msgLen);
-        
-        // //printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
-        
-        // /*Set position to be same as server*/
-        // parseViewPos(msg);
-        
-    // }
-    // else if (ch == 'O') {
-        // int msgLen = 26;    //msg = aaaa.bbbbbb,xxxx.yyyyyy
-        // char msg[msgLen];
-        // //printf("read a character from server %c\n", ch);
-        // /*Get the message*/
-        // read(sockfd, &msg, msgLen);
-        
-        // /*Parse the orientation information from the server*/
-        // parseOrientPos(msg);
-        // //printf("---msgfrom server %s\n", msg);
-        
-    // }
-    // else if (ch == 'M') {
-        // int msgLen = 12;
-        // char msg[msgLen];
-        
-        // /*Get the message*/
-        // read(sockfd, &msg, msgLen);
-        // //printf("---msgfrom server %s\n", msg);
-        
-        // /*Parse the projectile information*/
-        // parseProjectInfo(msg);
-    // }
-// }
-
-// /*Parse the view position sent from the server*/
-// void parseViewPos(char *msg) {
-    // //printf("parseViewPos = %s\n", msg);
-    // int x = 0, y = 0, z = 0;
-    // int numMsg = 3;
-    // int msgLen = 10;
-    
-    // char ** msgSplit;
-    
-    // /*Parse the message to the three coordinates*/
-    // msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
-    
-    // /*Convert string to an integer*/
-    // x = atoi(msgSplit[0]) * -1;
-    // y = atoi(msgSplit[1]) * -1;
-    // z = atoi(msgSplit[2]) * -1;
-    
-    // /*Set the client location based on the server's*/
-    // //printf("pos - x, y, z = %d, %d, %d \n", x, y, z);
-    // setViewPosition(x, y, z);
-    
-    // /*Free memory for array*/
-    // free(*msgSplit);
-    // free(msgSplit);
-// }
-
-// /*Parse the orientation information from the server*/
-// void parseOrientPos(char *msg) {
-    // int x = 0, y = 0, z = 0;
-    // int numMsg = 3;
-    // int msgLen = 10;
-    
-    // char ** msgSplit;
-    
-    // /*Parse the message to the two coordinates*/
-    // msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
-    
-    // /*Convert string to an integer*/
-    // x = atoi(msgSplit[0]);
-    // y = atoi(msgSplit[1]);
-    
-    // /*Set the client location based on the server's*/
-    // //printf("ori - x, y, z = %d, %d, %d \n", x, y, z);
-    // setViewOrientation(x, y, z);
-    
-    // /*Free memory for array*/
-    // free(*msgSplit);
-    // free(msgSplit);
-    
-// }
-
-// /*Parse the information about the projectile*/
-// void parseProjectInfo(char *msg) {
-    // int numMsg = 3;
-    // int msgLen = 10;
-    
-    // float speed = 0.0, angle = 0.0;
-    
-    // char ** msgSplit;
-    
-    // /*Parse the message to the three coordinates*/
-    // msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
-    
-    // /*Convert string to an integer*/
-    // speed = atof(msgSplit[0]);
-    // angle = atof(msgSplit[1]);
-    
-    // //printf("HERE - speed and angle = %f, %f", speed, angle);
-    // /*Create the projectile*/
-    // createClientProj(speed, angle);
-    
-    // /*Free memory for array*/
-    // free(*msgSplit);
-    // free(msgSplit);
-// }
-
-// /*Create new projectile in the client world*/
-// void createClientProj(float speed, float angle) {
-    // float xPos, yPos, zPos;
-    // //static int oldMouPosX, oldMouPosY;
-    // //static int oldX, oldY, oldZ;
-    // //float xPos, yPos, zPos;
-    // float xaxis, yaxis, zaxis;
-    // int reminder, projNum;
-    // float hor, height;
-    // float dx, dz;
-    // //static float speed, angle;
-    // int orientAngle;
-    // float radian;
-    
-    // /*Get the current position*/
-    // getViewPosition(&xPos, &yPos, &zPos);
-    
-    // /*Determine player orientation*/
-    // getViewOrientation(&xaxis, &yaxis, &zaxis);
-    // reminder = abs((int)yaxis) % 360;
-    
-    // /*Convert position to be positive for the projectile*/
-    // xPos *= -1;
-    // yPos *= -1;
-    // zPos *= -1;
-    
-    // radian = angle * M_PI / 180.0f;  //convert to radian
-    // height = sin(radian)*(speed);
-    // hor = cos(radian)* (speed);
-    
-    // /*Determine if the projectile angle is 90 degrees*/
-    // if (angle >= 90) {
-        // /*Orientation direction*/
-        // dz = 0;
-        // dx = 0;
-    // }
-    // else {
-        // orientAngle = reminder % 90;
-        // radian = orientAngle * M_PI / 180.0f;  //convert to radian
-        
-        // /*Orientation direction*/
-        // dz = sin(radian) * hor;
-        // dx = cos(radian) * hor;
-        
-    // }
-    
-    // /*Determine what quadrant it's in*/
-    // nextProjLoc(&xPos, &zPos, dx, dz, reminder);
-    
-    // /*Create the mob*/
-    // //yPos += 0.2;
-    // projNum = projNumber;
-    // createMob(projNum, xPos, yPos, zPos, 0);
-    // showMob(projNum);
-    
-    // /*Save mob configuration on the plane*/
-    // projectile[projNum][0] = xPos;
-    // projectile[projNum][2] = zPos;
-    // projectile[projNum][3] = dx;
-    // projectile[projNum][5] = dz;
-    // projectile[projNum][6] = (float)reminder;
-    
-    // /*Save mob configuration in flight*/
-    // projectile[projNum][1] = yPos;
-    // projectile[projNum][7] = (float)angle;
-    // projectile[projNum][8] = (float)speed;
-    // projectile[projNum][9] = 0.0;
-    
-    // /*Determine the number of projectiles in the world*/
-    // if (projNumber + 1 > 9) {
-        // projNumber = 0;
-    // }
-    // else {
-        // projNumber++;   //Increase projectile number
-    // }
-// }
-
-// /*Split the message to coordinate*/
-// char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
-    // int i = 0;    //loop counters
-    // char delim[2] = ",";
-    // char ** msgSplit;
-    // msgSplit = (char**)malloc(msgLen * sizeof(char**));
-    
-    // char* token = strtok(msg, delim);
-    
-    // /*Go through all the tokens*/
-    // while (token != NULL) {
-        // if (token != NULL) {
-            // msgSplit[i] = (char*)malloc(sizeof(char*) * sizeof(token) + 2);
-            // strcpy(msgSplit[i], token);    //Save the message
-            
-            // i++;
-        // }
-        
-        // token = strtok(NULL, delim);
-    // }
-    
-    // return msgSplit;
-// }
-
-
-
 
 /**/
 /**/
@@ -1443,8 +1046,13 @@ int main(int argc, char** argv)
 {
 int i, j, k;
     
-    /*Set the flags according to if its a server or client*/
-    gameMode = argv[1];
+   /*Set the flags according to if its a server or client*/
+   if (argc > 1) { 
+      gameMode = argv[1];
+   }
+   else if (argc == 1) {
+      gameMode = "default";
+   }
     
 	/* initialize the graphics system */
    graphicsInit(&argc, argv);
@@ -1495,52 +1103,42 @@ int i, j, k;
       createPlayer(0, 52.0, 27.0, 52.0, 0.0);
 
    } else {
-
 	/* your code to build the world goes here */
-       printf("argc = %d\n", argc); //TESTING!!!!!
-       if (argc > 1) {
-           int seedLen = 6;
-           char seed[seedLen];
-           
-           /*Determine if the program is a server or client*/
-           if (strcmp(gameMode,"-server") == 0) {
+      /*Generate a landscape seed*/
+      int seedLen = 6;
+      char seed[seedLen];
+      landSeed = (rand() % landSeed) + 400000;
                
-               /*Open socket as a server*/
-               openSocketServer();
-               
-               /*Generate a landscape seed*/
-               landSeed = (rand() % landSeed) + 400000;
-               
-               sprintf(seed, "%d", landSeed);    //Convert integer to a string
-               printf("Server - landscape seed = %d in str = %s\n", landSeed, seed);
-               
-               /*Send client the seed*/
-               write(client_sockfd, &seed, seedLen);
-           }
-           else if(strcmp(gameMode,"-client") == 0) {
-               /*Open socket as a client*/
-               //readSocket();
-               openSocketClient();
-               
-               /*Read the seed that was passed over*/
-               read(sockfd, &seed, seedLen);
-               landSeed = atoi(seed);   //Convert string to an integer
-               
-               printf("Client - landscape seed = %d in str = %s\n", landSeed, seed);
-           }
-       }
+      if (argc > 1) { 
+         /*Determine if the program is a server or client*/
+         if (strcmp(gameMode,"-server") == 0) {
+            /*Open socket as a server*/
+            openSocketServer();
+                           
+            sprintf(seed, "%d", landSeed);    //Convert integer to a string
+            printf("Server - landscape seed = %d in str = %s\n", landSeed, seed);
+            
+            /*Send client the seed*/
+            write(client_sockfd, &seed, seedLen);
+         }
+         else if(strcmp(gameMode,"-client") == 0) {
+            /*Open socket as a client*/
+            //readSocket();
+            openSocketClient();
+            
+            /*Read the seed that was passed over*/
+            read(sockfd, &seed, seedLen);
+            landSeed = atoi(seed);   //Convert string to an integer
+            
+            printf("Client - landscape seed = %d in str = %s\n", landSeed, seed);
+         }
+      }
        
       /*Creates the game landscape*/
       landscape();
        
       /*Initiate projectile array*/
-      initProjectiles();
-       
-       /*Open up server connection*/
-       //openSocket();
-       
-       
-       
+      initProjectiles();      
    }
 
 
@@ -1562,27 +1160,27 @@ void landscape() {
 }
 
 void worldOrientation() {
-    int y = 40;
-    
-    /*NORTH*/
-    world[80][y][50] = 2;   //blue
-    world[80][y-1][50] = 2;   //blue
-    world[80][y-2][50] = 2;   //blue
-    
-    /*EAST*/
-    world[50][y][80] = 4;   //black
-    world[51][y-1][80] = 4;   //black
-    world[50][y-2][80] = 4;   //black
-    
-    /*SOUTH*/
-    world[20][y][50] = 3;   //red
-    world[20][y-1][50] = 3;   //red
-    world[20][y-2][50] = 3;   //red
-    
-    /*WEST*/
-    world[50][y][20] = 5;   //white
-    world[51][y-1][20] = 5;   //white
-    world[50][y-2][20] = 5;   //white
+   int y = 40;
+
+   /*NORTH*/
+   world[80][y][50] = 2;   //blue
+   world[80][y-1][50] = 2;   //blue
+   world[80][y-2][50] = 2;   //blue
+
+   /*EAST*/
+   world[50][y][80] = 4;   //black
+   world[51][y-1][80] = 4;   //black
+   world[50][y-2][80] = 4;   //black
+
+   /*SOUTH*/
+   world[20][y][50] = 3;   //red
+   world[20][y-1][50] = 3;   //red
+   world[20][y-2][50] = 3;   //red
+
+   /*WEST*/
+   world[50][y][20] = 5;   //white
+   world[51][y-1][20] = 5;   //white
+   world[50][y-2][20] = 5;   //white
 }
 
 /*Create a floor in the game world*/
