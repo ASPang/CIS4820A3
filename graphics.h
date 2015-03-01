@@ -57,3 +57,22 @@ float nextProjHeight(float , float, float *);
 
 float calSpeed(int, int);
 float calAngle(int, int);
+
+
+/*Functions for CIS4820A Assignment 3 - Networking*/
+void openSocketServer();
+void openSocketClient();
+void writeSocket();
+
+void sendViewPos();
+void sendViewOrient();
+
+void convertPosNumDigit(char *);
+void convertOrientNumDigit(char *);
+
+void readSocket();
+void parseViewPos(char *);
+
+
+char ** splitNumMsgInfo(char *, int, int);
+

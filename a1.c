@@ -16,8 +16,13 @@
 
 #include "graphics.h"
 
+    /* Network Information */
+char* oldServerPos = "";
+//char oldServerPos[34] = "";
+char* oldServerOrient = "";
+
     /* Program Mode */
-char* gameMode;    //The game can be of one of two different states: -server or -client
+char* gameMode = "";    //The game can be of one of two different states: -server or -client
 
     /* projectile Information */
 float projectile[10][10];  //dx, dy, velocity
@@ -363,30 +368,115 @@ void update() {
       } else {
 
       /* your code goes here */
-         /*Determine if the fly control is on or off*/
-         if (flycontrol == 0) {
-            gravity();
-         } 
-
-         /*Move the clouds*/
-         moveCloud();
-          
-         /*Update the projectile*/
-          moveProjectile();
-          objectCollision();
-          
+          /*Move the clouds*/
+          moveCloud();
+                    
          /*Determine if the program is a server or client*/
           if (strcmp(gameMode,"-server") == 0) {
-              /*Write to socket*/
-              writeSocket();
+              /*Determine if the fly control is on or off*/
+              if (flycontrol == 0) {
+                  gravity();
+              }
+              
+              /*Update the projectile*/
+              moveProjectile();
+              objectCollision();
+              
+              if (oneSec2()) {
+                  /*Write to socket*/
+                  writeSocket();
+              }
           }
           else if(strcmp(gameMode,"-client") == 0) {
-              /*Write to socket*/
-              readSocket();
+              /*Read every one second*/
+              if (oneSec()) {
+                  /*Read to socket*/
+                  readSocket();
+              }
           }
          
       }
    }
+}
+
+
+/*
+ * References: http://stackoverflow.com/questions/3756323/getting-the-current-time-in-milliseconds
+ */
+int oneSec() {
+    static clock_t updateStart;
+    clock_t updateEnd;
+    static int resetTime = 1;
+    int milsec = 10000; //Milliseconds;
+    double diff;
+    
+    struct timeval  tv;
+    double time_in_mill;
+    
+    gettimeofday(&tv, NULL);
+    
+    /*Determine if the timer has been set*/
+    if (resetTime == 1) {
+        /*Reset the timer*/
+        resetTime = 0;
+        
+        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
+        
+        updateStart = time_in_mill;
+    }
+    else if (resetTime == 0) {
+        /*Determine if 0.08 second has passed*/
+        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
+        
+        updateEnd = time_in_mill;
+        diff = ((updateEnd - updateStart));
+        
+        if (diff >= 80) {
+            resetTime = 1;  //Reset the timer
+            return 1;    //Return true that 1 second has passed
+        }
+    }
+    
+    
+    return 0;   //Don't update the function
+}
+
+int oneSec2() {
+    static clock_t updateStart;
+    clock_t updateEnd;
+    static int resetTime = 1;
+    int milsec = 10000; //Milliseconds;
+    double diff;
+    
+    struct timeval  tv;
+    double time_in_mill;
+    
+    gettimeofday(&tv, NULL);
+    
+    /*Determine if the timer has been set*/
+    if (resetTime == 1) {
+        /*Reset the timer*/
+        resetTime = 0;
+        
+        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
+        
+        updateStart = time_in_mill;
+    }
+    else if (resetTime == 0) {
+        /*Determine if 0.08 second has passed*/
+        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
+        
+        updateEnd = time_in_mill;
+        diff = ((updateEnd - updateStart));
+        
+        if (diff >= 500) {
+            resetTime = 1;  //Reset the timer
+            return 1;    //Return true that 1 second has passed
+        }
+    }
+    
+    
+    return 0;   //Don't update the function
 }
 
 /**/
@@ -649,27 +739,40 @@ void readSocket() {
     if (ch == 'P') {
       int msgLen = 34;
       char msg[msgLen];
-      printf("read a character from server %c\n", ch);
+      //printf("read a character from server %c\n", ch);
       /*Get the message*/
       read(sockfd, &msg, msgLen);
-        printf("---msgfrom server %s\n", msg);
-      /*Set position to be same as server*/
-      parseViewPos(msg);
+      //  printf("---msgfrom server %s\n", msg);
+        /*
+        oldServerPos = "";
+        char* oldServerOrient = "";*/
+        
+        //if (strcmp(oldServerPos, msg) != 0) {
+        //if (oldServerPos[33] == msg[33]) {
+            //strcpy(oldServerPos, msg);
+            //oldServerPos = msg;
+            printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
+            /*Set position to be same as server*/
+            parseViewPos(msg);
+        //}
+        //else {
+            //printf("No change\n");
+        //}
         
       
     }
     else if (ch == 'O') {
         int msgLen = 26;    //msg = aaaa.bbbbbb,xxxx.yyyyyy
         char msg[msgLen];
-        printf("read a character from server %c\n", ch);
+        //printf("read a character from server %c\n", ch);
         /*Get the message*/
         read(sockfd, &msg, msgLen);
-        printf("---msgfrom server %s\n", msg);
+        //printf("---msgfrom server %s\n", msg);
         
     }
     else {
     
-        printf("in else - read a character from server %c\n", ch);
+        //printf("in else - read a character from server %c\n", ch);
     }
     
     
@@ -685,11 +788,31 @@ void parseViewPos(char *msg) {
     int numMsg = 3;
     int msgLen = 10;
     
-    //char msgSplit[numMsg][msgLen];
-    char ** msgSplit;
+    char msgSplit[numMsg][msgLen];
+    //char ** msgSplit;
     
     /*Parse the message to the three coordinates*/
-    msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+    //msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+    
+    int i = 0;
+    char delim[2] = ",";
+    char* token = strtok(msg, delim);
+    
+    /*Go through all the tokens*/
+    while (token != NULL) {
+        if (token != NULL) {
+            //printf("--- token = %s (size:%d), ", token, (int)sizeof(token)+2);
+            //msgSplit[i] = (char*)malloc(sizeof(char*) * sizeof(token) + 2);
+            strcpy(msgSplit[i], token);    //Save the message
+            
+            i++;
+        }
+        
+        token = strtok(NULL, delim);
+        
+    }
+    
+    
     
     /*TESTING
     int i = 0;
@@ -702,19 +825,18 @@ void parseViewPos(char *msg) {
     y = atoi(msgSplit[1]) * -1;
     z = atoi(msgSplit[2]) * -1;
     
-    printf("x,y,z = %d, %d, %d \n", x, y, z);
-    
     /*Set the client location based on the server's*/
+    printf("x, y, z = %d, %d, %d \n", x, y, z);
     setViewPosition(x, y, z);
     
     
-    free(*msgSplit);
-    free(msgSplit);
+    /*free(*msgSplit);
+    free(msgSplit);*/
 }
 
 /*Split the message to coordinate*/
 char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
-   char** tokens;
+   //char** tokens;
    int i = 0;    //loop counters
    char delim[2] = ",";
     
@@ -724,13 +846,7 @@ char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
     char ** msgSplit;
     msgSplit = (char**)malloc(msgLen * sizeof(char**));
     
-    //char msgSplit[numMsg][msgLen];
-    
-    //printf("HERE\n");
-    
     char* token = strtok(msg, delim);
-    //msgSplit[0] = (char*)malloc(msgLen*sizeof(token) + 10);
-    //printf("first token = %s  \n ", token);
     
     /*Go through all the tokens*/
     while (token != NULL) {
@@ -1162,6 +1278,10 @@ float calAngle(int oldY, int newY) {
 int main(int argc, char** argv)
 {
 int i, j, k;
+    
+    /*Set the flags according to if its a server or client*/
+    gameMode = argv[1];
+    
 	/* initialize the graphics system */
    graphicsInit(&argc, argv);
 
@@ -1217,10 +1337,6 @@ int i, j, k;
        if (argc > 1) {
            int seedLen = 6;
            char seed[seedLen];
-           
-           /*Set the flags according to if its a server or client*/
-           gameMode = argv[1];
-           printf("argv = %s and gamemode = %s \n", argv[1], gameMode); //TESTING!!!!!
            
            /*Determine if the program is a server or client*/
            if (strcmp(gameMode,"-server") == 0) {

@@ -19,6 +19,8 @@ extern void buildDisplayList();
 extern void mouse(int, int, int, int);
 extern void draw2D();
 
+/* Program Mode */
+extern char* gameMode;    //The game can be of one of two different states: -server or -client
 
 	/* flags used to control the appearance of the image */
 int lineDrawing = 0;	// draw polygons as solid or lines
@@ -773,9 +775,11 @@ int i, fullscreen;
    glutKeyboardFunc (keyboard);
    glutPassiveMotionFunc(passivemotion);
    glutMotionFunc(motion);
-   glutMouseFunc(mouse);
    glutIdleFunc(update);
 
+   if (strcmp(gameMode, "-server") == 0) {
+       glutMouseFunc(mouse);
+   }
 
 	/* initialize mob and player array to empty */
    initMobArray();
