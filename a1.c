@@ -309,11 +309,12 @@ int screenHeight = 768;*/
       }
       
       
+      /*Draw the projectile*/
+      drawProjToMap(mX1, mY2);
+      
       /*Draw a square to indicate the player's location on the map*/
       drawPlayerToMap(mX1, mY2);
       
-      /*Draw the projectile*/
-      //drawProjToMap();
       
       /*Draw the map area*/
       drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
@@ -369,24 +370,13 @@ void drawPlayerToMap(int mX, int mY) {
    pX = (int)floor(z) * -1;
    pY = (int)floor(x) * -1;
    
-   /*mX += pX * 2; 
-   mY -= pY * 2;*/
-   /*mX = 0;
-   mY = 0*/
-   
+   /*Convert location to map*/
    mX += pX * 2;
-   //mY -= 220 - (pY * 2);
    mY += pY * 2;
    
-   //printf("player = mx1, my1 = %d, %d, %d, %d \n", mX1, mY1, mX1 + pSize, mY1 + pSize);
    /*Create a 20x20 pixel square and center it to represent the player*/
    set2Dcolour(green);
-   draw2Dbox(mX - pSize, mY - pSize, mX + pSize, mY + pSize); //draw2Dbox(int x1, int y1, int x2, int y2)
-  
-
-  //draw2Dbox(mX1  + pSize, mY1 + pSize, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
-   
-   //draw2Dbox(100, 100, mX1, mY1); //draw2Dbox(int x1, int y1, int x2, int y2)
+   draw2Dbox(mX - pSize, mY - pSize, mX + pSize, mY + pSize); //int x1, int y1, int x2, int y2
 }
 
 /*Draw any projectiles to the map*/
@@ -395,13 +385,14 @@ void drawProjToMap(int mX, int mY) {
    int pSize = 4; //projectile size
    float x, y, z;
    int pX, pY;
+   int newX, newY;
    int i;   //Loop counters
    
    /*Colour Variable*/
-   GLfloat blue[] = {0.0, 0.0, 0.5, 0.5};
+   GLfloat blue[] = {0.0, 0.0, 0.5, 0.8};
       
       
-      
+   /*Go through all the projectiles*/   
    for (i = 0; i < 10; i++) {
       /*Get current projectile position*/
       x = projectile[i][0];
@@ -410,11 +401,16 @@ void drawProjToMap(int mX, int mY) {
 
       if (x >= 0 && y >= 0 && z >= 0) {
          /*Convert the location to positive integer*/
-         pX = (int)floor(z) * -1;
-         pY = (int)floor(x) * -1;
+         pX = (int)floor(z);
+         pY = (int)floor(x);
          
-         mX += pX * 2; 
-         mY -= pY * 2;
+         /*Convert location to map*/
+         newX = mX + pX * 2;
+         newY = mY + pY * 2;
+         
+         /*Draw a square and center it to represent the projectile*/
+         set2Dcolour(blue);
+         draw2Dbox(newX - pSize, newY - pSize, newX + pSize, newY + pSize); //int x1, int y1, int x2, int y2
          
          
          // /*Update mob position - height*/        
@@ -449,11 +445,6 @@ void drawProjToMap(int mX, int mY) {
    
    /*Get player's current position*/
    // getViewPosition(&x, &y, &z);
-   
-   
-   
-   
-   
 }
 
 
