@@ -50,14 +50,19 @@ extern void convertProjNumDigit(char *);
 
 extern char ** splitNumMsgInfo(char *, int, int);
 
-    /* Program Mode */
+   /* Map Display Functions */
+void drawMapArea(int, int, int, int, int, int);
+void drawPlayerToMap(int, int, int);
+void drawProjToMap(int, int, int);
+
+   /* Program Mode */
 char* gameMode = "";    //The game can be of one of two different states: -server or -client
 
-    /* projectile Information */
+   /* projectile Information */
 float projectile[10][10];  //dx, dy, velocity
 float projNumber=0;
 
-    /* Landscape seed */
+   /* Landscape seed */
 int landSeed = 580789;
 
 	/* mouse function called by GLUT when a button is pressed or released */
@@ -282,181 +287,40 @@ void draw2D() {
 
 	/* your code goes here */
       /*Map variables*/      
-      int mSize = 220;  //Map size with a space buffer of 20
-      int spaceBuf = 20;   //Map space buffer
+      //int baseWidth = 1024;
+      //int baseHeight = 768;
+      
+      //int spaceBuf = 20;   //Map space buffer
+      //int mSize = 200 + spaceBuf;  //Map size with a space buffer of 20
+      
+      int spaceBuf = screenWidth * 0.01;   //Map space buffer
+      int mSize = screenWidth / 5 + spaceBuf;
+      
    
       int mX1 = screenWidth - mSize;
       int mY1 = screenHeight - spaceBuf;
       int mX2 = screenWidth - spaceBuf;
       int mY2 = screenHeight - mSize;
-      
-      
-      
-      
-      /*screenWidth and screenHeight*/
-      /*w  = 1024;
-int screenHeight = 768;*/
-      
-      
-      
+            
+            
       //printf("displayMap =  %d \n", displayMap);   //TESTING!!!!!!!!!!!!
       /*Determine what kind of map to display*/
       if (displayMap == 0) {  //No map
       }
       else if (displayMap == 1) {   //Small  upper right corner map - default
+         /*Draw the projectile*/
+         drawProjToMap(mX1, mY2, mSize);
+         
+         /*Draw a square to indicate the player's location on the map*/
+         drawPlayerToMap(mX1, mY2, mSize);
+         
+         /*Draw the map area*/
+         drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
       }
       else if (displayMap == 2) {   //Large map in the middle
       }
-      
-      
-      /*Draw the projectile*/
-      drawProjToMap(mX1, mY2);
-      
-      /*Draw a square to indicate the player's location on the map*/
-      drawPlayerToMap(mX1, mY2);
-      
-      
-      /*Draw the map area*/
-      drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
    }
-
 }
-
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-
-/*Draws the map area and its boarder*/
-void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize, int spaceBuf) {
-   int lineWidth = 5;   //Map boarder width
-   
-   /*Colour Variables*/
-   GLfloat black[] = {0.0, 0.0, 0.0, 0.8};
-   GLfloat grey[] = {0.0, 0.0, 0.0, 0.5};
-      
-   /*Draw lines to indicate the boundary of the map*/
-   set2Dcolour(black);
-   //draw2Dline(int x1, int y1, int x2, int y2, int lineWidth)
-   draw2Dline(mX1 - lineWidth, mY1, mX1 + (mSize - spaceBuf + lineWidth), mY1, lineWidth);   //Top boarder
-   draw2Dline(mX1 - lineWidth, mY2, mX1 + (mSize - spaceBuf + lineWidth), mY2, lineWidth);   //Bottom boarder
-   
-   draw2Dline(mX1 - lineWidth/2, mY1, mX1 - lineWidth/2, mY1 - (mSize - spaceBuf), lineWidth);   //Left boarder
-   draw2Dline(mX2 + (lineWidth/2 + 1), mY1, mX2 + (lineWidth/2 + 1), mY1 - (mSize - spaceBuf), lineWidth);   //Right boarder
-   
-   /*Draw the map area**/
-   set2Dcolour(grey);
-   draw2Dbox(mX1, mY1, mX2, mY2); //draw2Dbox(int x1, int y1, int x2, int y2)
-   //printf("mx1, my1, x2,y2 = %d, %d, %d, %d \n", mX1, mY1, mX2, mY2);
-}
-
-/*Draw the player to the map*/
-void drawPlayerToMap(int mX, int mY) {
-   /*Player Variables*/
-   int pSize = 10; //Player size
-   float x, y, z;
-   int pX, pY;
-   
-   /*Colour Variable*/
-   GLfloat green[] = {0.0, 0.5, 0.0, 0.5};
-      
-   /*Get player's current position*/
-   getViewPosition(&x, &y, &z);
-   
-   /*Convert the location to positive integer*/
-   pX = (int)floor(z) * -1;
-   pY = (int)floor(x) * -1;
-   
-   /*Convert location to map*/
-   mX += pX * 2;
-   mY += pY * 2;
-   
-   /*Create a 20x20 pixel square and center it to represent the player*/
-   set2Dcolour(green);
-   draw2Dbox(mX - pSize, mY - pSize, mX + pSize, mY + pSize); //int x1, int y1, int x2, int y2
-}
-
-/*Draw any projectiles to the map*/
-void drawProjToMap(int mX, int mY) {
-   /*Player Variables*/
-   int pSize = 4; //projectile size
-   float x, y, z;
-   int pX, pY;
-   int newX, newY;
-   int i;   //Loop counters
-   
-   /*Colour Variable*/
-   GLfloat blue[] = {0.0, 0.0, 0.5, 0.8};
-      
-      
-   /*Go through all the projectiles*/   
-   for (i = 0; i < 10; i++) {
-      /*Get current projectile position*/
-      x = projectile[i][0];
-      y = projectile[i][1];
-      z = projectile[i][2];
-
-      if (x >= 0 && y >= 0 && z >= 0) {
-         /*Convert the location to positive integer*/
-         pX = (int)floor(z);
-         pY = (int)floor(x);
-         
-         /*Convert location to map*/
-         newX = mX + pX * 2;
-         newY = mY + pY * 2;
-         
-         /*Draw a square and center it to represent the projectile*/
-         set2Dcolour(blue);
-         draw2Dbox(newX - pSize, newY - pSize, newX + pSize, newY + pSize); //int x1, int y1, int x2, int y2
-         
-         
-         // /*Update mob position - height*/        
-         // angleY = projectile[i][7];
-         // speed = projectile[i][8];
-         // gravity = projectile[i][9];
-         // height = nextProjHeight(angleY, speed, &gravity);
-         // yPos += height;
-
-         // /*Update mob position - plane*/        
-         // dx = projectile[i][3];
-         // dz = projectile[i][5];
-         // angleX = projectile[i][6];
-
-         // nextProjLoc(&xPos, &zPos, dx, dz, angleX);
-         
-         // /*Update the mob position in the world*/
-         // setMobPosition(i, xPos, yPos, zPos, 0);
-
-         // /*Show mob*/
-         // showMob(i);
-
-         // /*Save mob configuration on the plane*/
-         // projectile[i][0] = xPos;
-         // projectile[i][2] = zPos;
-
-         // /*Save mob configuration in flight*/
-         // projectile[i][1] = yPos;
-         // projectile[i][9] = gravity;
-      }            
-   }
-   
-   /*Get player's current position*/
-   // getViewPosition(&x, &y, &z);
-}
-
-
-
-
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
 
 
 /* 
