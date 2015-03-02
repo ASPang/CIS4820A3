@@ -44,11 +44,11 @@ void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize) {
    /*Draw lines to indicate the boundary of the map*/
    set2Dcolour(black);
    //draw2Dline(int x1, int y1, int x2, int y2, int lineWidth)
-   draw2Dline(mX1 - lineWidth, mY1, mX1 + (mX2 - mX1 + lineWidth), mY1, lineWidth);   //Top boarder
-   draw2Dline(mX1 - lineWidth, mY2, mX1 + (mX2 - mX1 + lineWidth), mY2, lineWidth);   //Bottom boarder
+   draw2Dline(mX1 - lineWidth + 1, mY1, mX1 + (mX2 - mX1 + lineWidth), mY1, lineWidth);   //Top boarder
+   draw2Dline(mX1 - lineWidth + 1, mY2, mX1 + (mX2 - mX1 + lineWidth), mY2, lineWidth);   //Bottom boarder
    
    draw2Dline(mX1 - lineWidth/2, mY1, mX1 - lineWidth/2, mY1 + (mY2 - mY1), lineWidth);   //Left boarder
-   draw2Dline(mX2 + (lineWidth/2 + 1), mY1, mX2 + (lineWidth/2 + 1), mY1 + (mY2 - mY1), lineWidth);   //Right boarder
+   draw2Dline(mX2 + (lineWidth/2), mY1, mX2 + (lineWidth/2), mY1 + (mY2 - mY1), lineWidth);   //Right boarder
    
    /*Draw the map area**/
    set2Dcolour(grey);

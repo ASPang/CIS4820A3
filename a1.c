@@ -14,7 +14,14 @@
 #include <string.h>
 #include <math.h>
 
+
+#include <pthread.h>
+
 #include "graphics.h"
+
+    /*Thread Functions*/
+extern void *clientThread(void *);
+extern void *serverThread(void *);
 
     /*Server Socket Variable**/
 extern int server_sockfd, client_sockfd;
@@ -455,21 +462,21 @@ void update() {
           
          /*Determine if the program is a server or client*/
           if (strcmp(gameMode,"-server") == 0) {
-              if (oneSec2()) {
+              //if (oneSec2()) {
                   /*Write to socket*/
                   writeSocket();
-              }
+              //}
           }
           else if(strcmp(gameMode,"-client") == 0) {
               /*Read every one second*/
               if (oneSec()) {
                     /*******************TESTING!!!!!!!!!!!!*********/
-                  float x,y,z;
-                  getViewPosition(&x,&y,&z);
-                  printf("x,y,z = %f, %f, %f \n", x,y,z); 
+                  //float x,y,z;
+                  //getViewPosition(&x,&y,&z);
+                  //printf("x,y,z = %f, %f, %f \n", x,y,z);
                   /**************END OF TESTING********************/
                   /*Read to socket*/
-                  readSocket();
+                  //readSocket();
               }
           }
          
@@ -822,10 +829,7 @@ void mouse(int button, int state, int x, int y) {
     float radian;
     
     /*Determine the mouse action*/
-    if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {
-        /*Send the client of the new projectile*/
-        sendProjectile(speed, angle);
-        
+    if (state == GLUT_DOWN && button == GLUT_LEFT_BUTTON) {        
         /*Get the current position*/
         getViewPosition(&xPos, &yPos, &zPos);
         
@@ -887,6 +891,19 @@ void mouse(int button, int state, int x, int y) {
         else {
             projNumber++;   //Increase projectile number
         }
+        
+        /*Send the client of the new projectile*/
+        //sendProjectile222(projectile[projNum][8], projectile[projNum][7]);
+        int cordLen = 6;
+        char speedStr[cordLen], angleStr[cordLen];
+        sprintf(speedStr, "%f", speed);
+        sprintf(angleStr, "%f", angle);
+        
+        speedStr[5] = '\0';
+        angleStr[5] = '\0';
+        
+        //sendProjectile222(0.20,25.00);
+        sendProjectile(speedStr, angleStr);
         
         /*Inform the User of the new angle set*/
         printf("Shot Projectile at: \nAngle = %0.2f and Speed =%0.2f\n ------\n", angle, speed);
@@ -1055,17 +1072,32 @@ int i, j, k;
             
             /*Send client the seed*/
             write(client_sockfd, &seed, seedLen);
+             
+             
+             //pthread_t pth;	// this is our thread identifier
+             
+             /* Create worker thread */
+             //pthread_create(&pth,NULL,serverThread, NULL);
+             
          }
          else if(strcmp(gameMode,"-client") == 0) {
             /*Open socket as a client*/
             //readSocket();
             openSocketClient();
             
-            /*Read the seed that was passed over*/
+                         
+            /*Read the seed that was passed over*/ 
             read(sockfd, &seed, seedLen);
             landSeed = atoi(seed);   //Convert string to an integer
             
             printf("Client - landscape seed = %d in str = %s\n", landSeed, seed);
+             
+             pthread_t pth;	// this is our thread identifier
+             
+             /* Create worker thread */
+             pthread_create(&pth,NULL,clientThread, NULL);
+             
+             
          }
       }
        
@@ -1082,7 +1114,6 @@ int i, j, k;
    glutMainLoop();
    return 0; 
 }
-
 
 /*Create the game world environment*/
 void landscape() {

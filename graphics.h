@@ -66,6 +66,7 @@ void writeSocket();
 
 void sendViewPos();
 void sendViewOrient();
+void sendProjectile(char *, char *);
 
 void convertPosNumDigit(char *);
 void convertOrientNumDigit(char *);
@@ -88,3 +89,6 @@ void drawProjToMap(int, int, int);
 void drawCordToMap(int, int, int );
 void convertPosForMap(char *);
 
+//Thread Functions
+void *clientThread(void *);
+void *serverThread(void *);
