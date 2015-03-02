@@ -610,7 +610,7 @@ static int lighton = 1;
          glutPostRedisplay();
          break;
       case 'w':		// forward motion
-         if (strcmp(gameMode, "-client") != 0) {
+         if (strcmp(gameMode, "-client") != 0 && netClient != 1) {
             oldvpx = vpx;
             oldvpy = vpy;
             oldvpz = vpz;
@@ -626,7 +626,7 @@ static int lighton = 1;
          }
          break;
       case 's':		// backward motion
-         if (strcmp(gameMode, "-client") != 0) {
+         if (strcmp(gameMode, "-client") != 0 && netClient != 1) {
             oldvpx = vpx;
             oldvpy = vpy;
             oldvpz = vpz;
@@ -642,7 +642,7 @@ static int lighton = 1;
          }
          break;
       case 'a':		// strafe left motion
-         if (strcmp(gameMode, "-client") != 0) {
+         if (strcmp(gameMode, "-client") != 0 && netClient != 1) {
             oldvpx = vpx;
             oldvpy = vpy;
             oldvpz = vpz;
@@ -654,7 +654,7 @@ static int lighton = 1;
          }   
          break;
       case 'd':		// strafe right motion
-         if (strcmp(gameMode, "-client") != 0) {
+         if (strcmp(gameMode, "-client") != 0  && netClient != 1) {
             oldvpx = vpx;
             oldvpy = vpy;
             oldvpz = vpz;
@@ -787,7 +787,7 @@ int i, fullscreen;
    glutMotionFunc(motion);
    glutIdleFunc(update);
 
-   if (strcmp(gameMode, "-client") != 0) {
+   if (strcmp(gameMode, "-client") != 0  && netClient != 1) {
        glutMouseFunc(mouse);
    }
 

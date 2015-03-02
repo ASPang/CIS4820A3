@@ -1,3 +1,6 @@
+/* Socket Code From: */
+/* Beginning Linux Programming, 4th edition, byt Matthew and Stone. */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,24 +50,13 @@ void *clientThread(void *arg) {
     }
 }
 
-/*Server Thread Program*/
-void *serverThread(void *arg) {
-    while(1) {
-        //if (oneSec2()) {
-        /*Write to socket*/
-        writeSocket();
-        //}
-    }
-}
-
- /*Open the socket as a server*/
+/*Open the socket as a server*/
+/*Reference: Beginning Linux Programming, 4th edition, byt Matthew and Stone. */
 void openSocketServer() {
     /*  Remove any old socket and create an unnamed socket for the server.  */
-    
     server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
     
     /*  Name the socket.  */
-    
     server_address.sin_family = AF_INET;
     server_address.sin_addr.s_addr = htonl(INADDR_ANY);
     server_address.sin_port = htons(9734);
@@ -72,46 +64,38 @@ void openSocketServer() {
     bind(server_sockfd, (struct sockaddr *)&server_address, server_len);
     
     /*  Create a connection queue and wait for clients.  */
-    
     listen(server_sockfd, 5);
     
-    /*  Accept a connection.  */
-    
+    /*  Accept a connection.  */    
     client_len = sizeof(client_address);
     client_sockfd = accept(server_sockfd,(struct sockaddr *)&client_address, &client_len);
-    
-    //close(client_sockfd); //TESTING!!!!! - Should be moved to when the user hits the "q" key
 }
 
 /*Open the socket as a client*/
+/*Reference: Beginning Linux Programming, 4th edition, byt Matthew and Stone. */
 void openSocketClient() {
     int result;
-    //char ch = 'A';
     
-    /*  Create a socket for the client.  */
-    
+    /*  Create a socket for the client.  */    
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     
-    /*  Name the socket, as agreed with the server.  */
-    
+    /*  Name the socket, as agreed with the server.  */    
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet_addr("127.0.0.1");
     address.sin_port = htons(9734);
     len = sizeof(address);
     
-    /*  Now connect our socket to the server's socket.  */
-    
+    /*  Now connect our socket to the server's socket.  */    
     result = connect(sockfd, (struct sockaddr *)&address, len);
     
     if(result == -1) {
-        perror("oops: client3");
+        perror("Unable to connect to server.");
         exit(1);
     }
 }
 
 /*Write information to socket that is sent to the client*/
 void writeSocket() {
-    char ch = 'A';
     static oldX, oldY, oldZ;
     float x, y, z;
     
@@ -142,7 +126,6 @@ void sendViewPos() {
     
     /*Inform the client that information being sent is viewPosition*/
     write(client_sockfd, &ch, 1);
-    //write(client_sockfd, '\0', 1);
     
     /*Send server's current position*/
     getViewPosition(&x, &y, &z);
@@ -151,15 +134,11 @@ void sendViewPos() {
     x = x * -1;
     y = y * -1;
     z = z * -1;
-    
-    //printf("x,y,z = %f,%f,%f \n", x, y, z);
-    
+        
     /*Convert coordinates to a string*/
     sprintf(strX, "%f", x);    //Convert integer to a string
     sprintf(strY, "%f", y);    //Convert integer to a string
     sprintf(strZ, "%f", z);    //Convert integer to a string
-    
-    //printf("strX %s\n", strX);
     
     /*Convert the three values into two digit string numbers - example 2 = "02" */
     convertPosNumDigit(strX);
@@ -176,8 +155,6 @@ void sendViewPos() {
     
     /*Send the message to client*/
     write(client_sockfd, &msgStr, msgLen);
-    
-    //printf("msgStr sent %s\n", msgStr);   //TESTING!!!!
 }
 
 /*Send the server's current view orientation*/
@@ -194,13 +171,9 @@ void sendViewOrient() {
     /*Send server's current position*/
     getViewOrientation(&x, &y, &z);
     
-    //printf("x,y,z = %f,%f,%f \n", x, y, z);
-    
     /*Convert coordinates to a string*/
     sprintf(strX, "%f", x);
     sprintf(strY, "%f", y);
-    
-    //printf("strX %s\n", strX);    //TESTING!!!!
     
     /*Convert the three values into two digit string numbers - example 2 = "02" */
     convertOrientNumDigit(strX);
@@ -214,32 +187,23 @@ void sendViewOrient() {
     
     /*Send message to client*/
     write(client_sockfd, &msgStr, msgLen);
-    //printf("ori - msgStr sent %s\n", msgStr);     //TESTING!!!!!!
 }
 
 /*Send information about projectile fired*/
-
 void sendProjectile(char *speedStr, char *angleStr) {
     char ch = 'M';
-    //float x, y, z;
     int cordLen = 6;
     int msgLen = 12;    //Might want to increment by one (13)
-    //char speedStr[cordLen], angleStr[cordLen];
+    
     char  msgStr[msgLen];
-    //printf("pro - number - speed %f and angle = %f \n", s, a);
+    
     /*Inform the client that information being sent is viewPosition*/
     write(client_sockfd, &ch, 1);
-    //printf("pro - number - speed %f and angle = %f \n", s, a);
-    /*Convert number to string*/
-    //sprintf(speedStr, "%f", s);
-    //sprintf(angleStr, "%f", a);
-    
-    printf("pro - speedStr %s and anglStr = %s \n", speedStr, angleStr);
-    
+        
     /*Format string*/
     convertProjNumDigit(speedStr);
     convertProjNumDigit(angleStr);
-    printf("pro - after cpmversopm speedStr %s and anglStr = %s \n", speedStr, angleStr);
+    
     /*Concate the message*/
     strcpy(msgStr,""); //Set up message
     strcat(msgStr, speedStr);
@@ -248,42 +212,6 @@ void sendProjectile(char *speedStr, char *angleStr) {
     
     /*Send message to client*/
     write(client_sockfd, &msgStr, msgLen);
-    
-    printf("pro - msgStr sent %s\n", msgStr);
-}
-
-
-void sendProjectile222(float speed, float angle) {
-    char ch = 'M';
-    //float x, y, z;
-    int cordLen = 6;
-    int msgLen = 12;    //Might want to increment by one (13)
-    char speedStr[cordLen], angleStr[cordLen];
-    char  msgStr[msgLen];
-    
-    /*Inform the client that information being sent is viewPosition*/
-    write(client_sockfd, &ch, 1);
-    printf("pro - number - speed %f and angle = %f \n", speed, angle);
-    /*Convert number to string*/
-    sprintf(speedStr, "%f", speed);
-    sprintf(angleStr, "%f", angle);
-    
-    printf("pro - speedStr %s and anglStr = %s \n", speedStr, angleStr);
-    
-    /*Format string*/
-    convertProjNumDigit(speedStr);
-    convertProjNumDigit(angleStr);
-    printf("pro - after cpmversopm speedStr %s and anglStr = %s \n", speedStr, angleStr);
-    /*Concate the message*/
-    strcpy(msgStr,""); //Set up message
-    strcat(msgStr, speedStr);
-    strcat(msgStr, ",");
-    strcat(msgStr, angleStr);
-    
-    /*Send message to client*/
-    write(client_sockfd, &msgStr, msgLen);
-    
-    printf("pro - msgStr sent %s\n", msgStr);
 }
 
 /*Convert the three values into two digit string numbers - example 2 = "02" */
@@ -384,13 +312,10 @@ void readSocket() {
     if (ch == 'P') {
         int msgLen = 34;
         char msg[msgLen];
-        //printf("read a character from server %c\n", ch);
         
         /*Get the message*/
         read(sockfd, &msg, msgLen);
-        
-        //printf("strcpy(oldServerPos, msg); = %s VS ---%s\n", oldServerPos, msg);
-        
+                
         /*Set position to be same as server*/
         parseViewPos(msg);
         
@@ -398,13 +323,12 @@ void readSocket() {
     else if (ch == 'O') {
         int msgLen = 26;    //msg = aaaa.bbbbbb,xxxx.yyyyyy
         char msg[msgLen];
-        //printf("read a character from server %c\n", ch);
+        
         /*Get the message*/
         read(sockfd, &msg, msgLen);
         
         /*Parse the orientation information from the server*/
         parseOrientPos(msg);
-        //printf("---msgfrom server %s\n", msg);
         
     }
     else if (ch == 'M') {
@@ -413,18 +337,14 @@ void readSocket() {
         
         /*Get the message*/
         read(sockfd, &msg, msgLen);
-        //printf("---msgfrom server %s\n", msg);
         
         /*Parse the projectile information*/
         parseProjectInfo(msg);
-        
-        //printf("pro - msgStr received %s\n", msg);
     }
 }
 
 /*Parse the view position sent from the server*/
 void parseViewPos(char *msg) {
-    //printf("parseViewPos = %s\n", msg);
     float x = 0.0, y = 0.0, z = 0.0;
     int numMsg = 3;
     int msgLen = 10;
@@ -440,8 +360,6 @@ void parseViewPos(char *msg) {
     z = atof(msgSplit[2]) * -1;
     
     /*Set the client location based on the server's*/
-    //printf("pos - x, y, z = %d, %d, %d \n", x, y, z);
-    printf("pos - x, y, z = %f, %f, %f \n", x, y, z);
     setViewPosition(x, y, z);
     
     /*Free memory for array*/
@@ -466,7 +384,6 @@ void parseOrientPos(char *msg) {
     y = atof(msgSplit[1]);
     
     /*Set the client location based on the server's*/
-    //printf("ori - x, y, z = %d, %d, %d \n", x, y, z);
     setViewOrientation(x, y, z);
     
     /*Free memory for array*/
@@ -491,7 +408,6 @@ void parseProjectInfo(char *msg) {
     speed = atof(msgSplit[0]);
     angle = atof(msgSplit[1]);
     
-    //printf("HERE - speed and angle = %f, %f", speed, angle);
     /*Create the projectile*/
     createClientProj(speed, angle);
     
@@ -576,9 +492,10 @@ char ** splitNumMsgInfo(char * msg, int numMsg, int msgLen) {
     int i = 0;    //loop counters
     char delim[2] = ",";
     char ** msgSplit;
-    msgSplit = (char**)malloc(msgLen * sizeof(char**));
     
-    char* token = strtok(msg, delim);
+    msgSplit = (char**)malloc(msgLen * sizeof(char**)); //Set up the array
+    
+    char* token = strtok(msg, delim);   //Get the first token
     
     /*Go through all the tokens*/
     while (token != NULL) {

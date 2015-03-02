@@ -91,4 +91,3 @@ void convertPosForMap(char *);
 
 //Thread Functions
 void *clientThread(void *);
-void *serverThread(void *);

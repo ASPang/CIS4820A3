@@ -14,7 +14,6 @@
 #include <string.h>
 #include <math.h>
 
-
 #include <pthread.h>
 
 #include "graphics.h"
@@ -380,7 +379,6 @@ int checkUpdateTime() {
         }
     }
     
-    
     return 0;   //Don't update the function
 }
 
@@ -456,129 +454,18 @@ void update() {
           objectCollision();
           
           /*Determine if the fly control is on or off*/
-          if (flycontrol == 0 && strcmp(gameMode,"-client") != 0) {
+          if (flycontrol == 0 && strcmp(gameMode,"-client") != 0 && netClient != 1) {
                gravity();
           }
           
          /*Determine if the program is a server or client*/
-          if (strcmp(gameMode,"-server") == 0) {
-              //if (oneSec2()) {
-                  /*Write to socket*/
-                  writeSocket();
-              //}
-          }
-          else if(strcmp(gameMode,"-client") == 0) {
-              /*Read every one second*/
-              if (oneSec()) {
-                    /*******************TESTING!!!!!!!!!!!!*********/
-                  //float x,y,z;
-                  //getViewPosition(&x,&y,&z);
-                  //printf("x,y,z = %f, %f, %f \n", x,y,z);
-                  /**************END OF TESTING********************/
-                  /*Read to socket*/
-                  //readSocket();
-              }
-          }
-         
+          if (strcmp(gameMode,"-server") == 0 && netServer == 1) {
+               /*Write to socket*/
+               writeSocket();
+          }         
       }
    }
 }
-
-
-/*
- * References: http://stackoverflow.com/questions/3756323/getting-the-current-time-in-milliseconds
- */
-int oneSec() {
-    static clock_t updateStart;
-    clock_t updateEnd;
-    static int resetTime = 1;
-    int milsec = 10000; //Milliseconds;
-    double diff;
-    
-    struct timeval  tv;
-    double time_in_mill;
-    
-    gettimeofday(&tv, NULL);
-    
-    /*Determine if the timer has been set*/
-    if (resetTime == 1) {
-        /*Reset the timer*/
-        resetTime = 0;
-        
-        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
-        
-        updateStart = time_in_mill;
-    }
-    else if (resetTime == 0) {
-        /*Determine if 0.08 second has passed*/
-        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
-        
-        updateEnd = time_in_mill;
-        diff = ((updateEnd - updateStart));
-        
-        if (diff >= 80) {
-            resetTime = 1;  //Reset the timer
-            return 1;    //Return true that 1 second has passed
-        }
-    }
-    
-    
-    return 0;   //Don't update the function
-}
-
-int oneSec2() {
-    static clock_t updateStart;
-    clock_t updateEnd;
-    static int resetTime = 1;
-    int milsec = 10000; //Milliseconds;
-    double diff;
-    
-    struct timeval  tv;
-    double time_in_mill;
-    
-    gettimeofday(&tv, NULL);
-    
-    /*Determine if the timer has been set*/
-    if (resetTime == 1) {
-        /*Reset the timer*/
-        resetTime = 0;
-        
-        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
-        
-        updateStart = time_in_mill;
-    }
-    else if (resetTime == 0) {
-        /*Determine if 0.08 second has passed*/
-        time_in_mill = (tv.tv_sec) * 1000 + (tv.tv_usec) / 1000 ; // convert tv_sec & tv_usec to millisecond
-        
-        updateEnd = time_in_mill;
-        diff = ((updateEnd - updateStart));
-        
-        if (diff >= 500) {
-            resetTime = 1;  //Reset the timer
-            return 1;    //Return true that 1 second has passed
-        }
-    }
-    
-    
-    return 0;   //Don't update the function
-}
-
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
-/**/
 
 /*Pulls the view point(camera) down the gameworld*/
 void gravity() {
@@ -866,7 +753,6 @@ void mouse(int button, int state, int x, int y) {
         nextProjLoc(&xPos, &zPos, dx, dz, reminder);
         
         /*Create the mob*/
-        //yPos += 0.2;
         projNum = projNumber;
         createMob(projNum, xPos, yPos, zPos, 0); 
         showMob(projNum);
@@ -892,18 +778,19 @@ void mouse(int button, int state, int x, int y) {
             projNumber++;   //Increase projectile number
         }
         
-        /*Send the client of the new projectile*/
-        //sendProjectile222(projectile[projNum][8], projectile[projNum][7]);
-        int cordLen = 6;
-        char speedStr[cordLen], angleStr[cordLen];
-        sprintf(speedStr, "%f", speed);
-        sprintf(angleStr, "%f", angle);
+        /*Send the client of the new projectile*/        
+        if (netServer == 1) {
+           int cordLen = 6;
+           char speedStr[cordLen], angleStr[cordLen];
+          
+           sprintf(speedStr, "%f", speed);
+           sprintf(angleStr, "%f", angle);
         
-        speedStr[5] = '\0';
-        angleStr[5] = '\0';
-        
-        //sendProjectile222(0.20,25.00);
-        sendProjectile(speedStr, angleStr);
+           speedStr[5] = '\0';
+           angleStr[5] = '\0';
+                
+           sendProjectile(speedStr, angleStr);
+        }
         
         /*Inform the User of the new angle set*/
         printf("Shot Projectile at: \nAngle = %0.2f and Speed =%0.2f\n ------\n", angle, speed);
@@ -1059,45 +946,40 @@ int i, j, k;
       /*Generate a landscape seed*/
       int seedLen = 6;
       char seed[seedLen];
+       
+      srand(time(NULL));
       landSeed = (rand() % landSeed) + 400000;
                
       if (argc > 1) { 
          /*Determine if the program is a server or client*/
          if (strcmp(gameMode,"-server") == 0) {
+            /*Set the game server network flag, is server when = 1*/
+            netServer = 1;
+             
             /*Open socket as a server*/
             openSocketServer();
                            
             sprintf(seed, "%d", landSeed);    //Convert integer to a string
-            printf("Server - landscape seed = %d in str = %s\n", landSeed, seed);
             
             /*Send client the seed*/
             write(client_sockfd, &seed, seedLen);
              
-             
-             //pthread_t pth;	// this is our thread identifier
-             
-             /* Create worker thread */
-             //pthread_create(&pth,NULL,serverThread, NULL);
-             
          }
          else if(strcmp(gameMode,"-client") == 0) {
+            /*Set the game client network flag, is client when = 1*/
+            netClient = 1;
+             
             /*Open socket as a client*/
-            //readSocket();
             openSocketClient();
-            
-                         
+             
             /*Read the seed that was passed over*/ 
             read(sockfd, &seed, seedLen);
             landSeed = atoi(seed);   //Convert string to an integer
-            
-            printf("Client - landscape seed = %d in str = %s\n", landSeed, seed);
+                         
+            pthread_t cThread;	// this is our thread identifier
              
-             pthread_t pth;	// this is our thread identifier
-             
-             /* Create worker thread */
-             pthread_create(&pth,NULL,clientThread, NULL);
-             
-             
+            /* Create worker thread */
+            pthread_create(&cThread,NULL,clientThread, NULL);
          }
       }
        
