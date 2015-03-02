@@ -285,14 +285,7 @@ void draw2D() {
       draw2Dbox(500, 380, 524, 388);
    } else {
 
-	/* your code goes here */
-      /*Map variables*/      
-      //int baseWidth = 1024;
-      //int baseHeight = 768;
-      
-      //int spaceBuf = 20;   //Map space buffer
-      //int mSize = 200 + spaceBuf;  //Map size with a space buffer of 20
-      
+	/* your code goes here */      
       int spaceBuf = screenWidth * 0.03;   //Map space buffer
       int mSize = screenWidth * 0.2;
       
@@ -301,8 +294,6 @@ void draw2D() {
       int mX2 = screenWidth - spaceBuf;
       int mY2 = screenHeight - mSize - spaceBuf;
             
-            
-      //printf("displayMap =  %d \n", displayMap);   //TESTING!!!!!!!!!!!!
       /*Determine what kind of map to display*/
       if (displayMap == 0) {  //No map
       }

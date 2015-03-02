@@ -52,8 +52,7 @@ void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize) {
    
    /*Draw the map area**/
    set2Dcolour(grey);
-   draw2Dbox(mX1, mY1, mX2, mY2); //draw2Dbox(int x1, int y1, int x2, int y2)
-   //printf("mx1, my1, x2,y2 = %d, %d, %d, %d \n", mX1, mY1, mX2, mY2);
+   draw2Dbox(mX1, mY1, mX2, mY2); //draw2Dbox(int x1, int y1, int x2, int y2) 
 }
 
 /*Draw the player to the map*/
@@ -131,15 +130,10 @@ void drawProjToMap(int mX, int mY, int mSize) {
 /*Display the Player's current position*/
 void drawCordToMap(int mX, int mY, int pSize) {
    float x, y, z;
-   //int strX, strY, strZ;
    int cordLen = 6;
-   int strLen = 24;
+   int strLen = 20;
    int i = 0;  //Loop counter 
    char strX[cordLen], strY[cordLen], strZ[cordLen], cordStr[strLen];
-   
-   
-   char *name="displaying text";
-   char *c;
    
    /*Set the text colour*/
    GLfloat black[] = {0.0, 0.0, 0.0, 0.9};
@@ -177,23 +171,13 @@ void drawCordToMap(int mX, int mY, int pSize) {
    strcat(cordStr, strZ);
    strcat(cordStr, ")\0");
 
-   glRasterPos2i(mX - pSize * 3, mY - pSize * 2); //position your text
+   /*Set text position*/
+   glRasterPos2i(mX - pSize * 3, mY - pSize * 2); 
    
+   /*Display text to screen*/
    for (i = 0; i < strLen; i++) {
       glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, cordStr[i]); 
    }
-   
-/*
-   for (c=name; *c != '\0'; c++) {
-      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, *c); 
-   }
-   */
-   /*
-   GLUT_BITMAP_TIMES_ROMAN_10
-   GLUT_BITMAP_8_BY_13
-   GLUT_BITMAP_9_BY_15
-   GLUT_BITMAP_TIMES_ROMAN_24
-   */
 }
 
 /*Convert the three values into two digit string numbers - example 2 = "02" */
