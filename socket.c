@@ -445,14 +445,10 @@ void parseProjectInfo(char *msg) {
 /*Create new projectile in the client world*/
 void createClientProj(float speed, float angle) {
     float xPos, yPos, zPos;
-    //static int oldMouPosX, oldMouPosY;
-    //static int oldX, oldY, oldZ;
-    //float xPos, yPos, zPos;
     float xaxis, yaxis, zaxis;
     int reminder, projNum;
     float hor, height;
     float dx, dz;
-    //static float speed, angle;
     int orientAngle;
     float radian;
     
@@ -484,15 +480,13 @@ void createClientProj(float speed, float angle) {
         
         /*Orientation direction*/
         dz = sin(radian) * hor;
-        dx = cos(radian) * hor;
-        
+        dx = cos(radian) * hor;        
     }
     
     /*Determine what quadrant it's in*/
     nextProjLoc(&xPos, &zPos, dx, dz, reminder);
     
     /*Create the mob*/
-    //yPos += 0.2;
     projNum = projNumber;
     createMob(projNum, xPos, yPos, zPos, 0);
     showMob(projNum);

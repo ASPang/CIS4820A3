@@ -78,6 +78,13 @@ void parseProjectInfo(char *);
 void createClientProj(float , float );
 void convertProjNumDigit(char *);
 
-
 char ** splitNumMsgInfo(char *, int, int);
+
+//2D Drawing Functions
+void drawMapArea(int, int, int, int, int);
+void drawPlayerToMap(int, int, int);
+void drawProjToMap(int, int, int);
+
+void drawCordToMap(int, int, int );
+void convertPosForMap(char *);
 

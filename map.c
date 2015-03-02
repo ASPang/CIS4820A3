@@ -40,7 +40,6 @@ void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize) {
    
    mY1 += screenHeight * mapBuf;
    mY2 -= screenHeight * mapBuf;
-   
       
    /*Draw lines to indicate the boundary of the map*/
    set2Dcolour(black);
@@ -66,7 +65,7 @@ void drawPlayerToMap(int mX, int mY, int mSize) {
    
    /*Colour Variable*/
    GLfloat green[] = {0.0, 0.5, 0.0, 0.5};
-      
+   
    /*Get player's current position*/
    getViewPosition(&x, &y, &z);
    
@@ -81,6 +80,9 @@ void drawPlayerToMap(int mX, int mY, int mSize) {
    /*Convert location to map*/
    mX += pX;
    mY += pY;
+   
+   /*Display player's current location on the map*/
+   drawCordToMap(mX, mY, pSize);
    
    /*Create a 20x20 pixel square and center it to represent the player*/
    set2Dcolour(green);
@@ -126,6 +128,94 @@ void drawProjToMap(int mX, int mY, int mSize) {
    }
 }
 
+/*Display the Player's current position*/
+void drawCordToMap(int mX, int mY, int pSize) {
+   float x, y, z;
+   //int strX, strY, strZ;
+   int cordLen = 6;
+   int strLen = 24;
+   int i = 0;  //Loop counter 
+   char strX[cordLen], strY[cordLen], strZ[cordLen], cordStr[strLen];
+   
+   
+   char *name="displaying text";
+   char *c;
+   
+   /*Set the text colour*/
+   GLfloat black[] = {0.0, 0.0, 0.0, 0.9};
+   set2Dcolour(black);
+   
+   /*Get player's current position*/
+   getViewPosition(&x, &y, &z);
+   
+   /*Convert to a positive number*/
+   x = x * -1;
+   y = y * -1;
+   z = z * -1;
 
+   /*Convert coordinates to a string*/
+   sprintf(strX, "%f", x);    
+   sprintf(strY, "%f", y);    
+   sprintf(strZ, "%f", z);    
+   
+   /*Trimming the decimal place down to two*/
+   strX[5] = '\0';
+   strY[5] = '\0';
+   strZ[5] = '\0';
+   
+   /*Convert the three values into two digit string numbers - example 2 = "02" */
+   convertPosForMap(strX);
+   convertPosForMap(strY);
+   convertPosForMap(strZ);
 
+   /*Concate the message*/
+   strcpy(cordStr,"("); //Set up message
+   strcat(cordStr, strX);
+   strcat(cordStr, ",");
+   strcat(cordStr, strY);
+   strcat(cordStr, ",");
+   strcat(cordStr, strZ);
+   strcat(cordStr, ")\0");
+
+   glRasterPos2i(mX - pSize * 3, mY - pSize * 2); //position your text
+   
+   for (i = 0; i < strLen; i++) {
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, cordStr[i]); 
+   }
+   
+/*
+   for (c=name; *c != '\0'; c++) {
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, *c); 
+   }
+   */
+   /*
+   GLUT_BITMAP_TIMES_ROMAN_10
+   GLUT_BITMAP_8_BY_13
+   GLUT_BITMAP_9_BY_15
+   GLUT_BITMAP_TIMES_ROMAN_24
+   */
+}
+
+/*Convert the three values into two digit string numbers - example 2 = "02" */
+void convertPosForMap(char * str) {
+    int strLen = 6;
+    int i = 0;  //Loop counter
+    char newStr[strLen];
+    
+    /*Look at the 3 character (position 2) of the string. Determine if it's a decimal*/
+    if (str[2] != '.') {
+        /*Add zero at the front*/
+        for (i = 0; i < strLen; i++) {
+            if (i == 0) {
+                newStr[i] = '0';
+            }
+            else {
+                newStr[i] = str[i-1];
+            }
+        }
+        
+        /*Replace old string with the new one*/
+        strcpy(str, newStr);
+    }
+}
 
