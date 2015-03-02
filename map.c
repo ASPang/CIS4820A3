@@ -61,9 +61,6 @@ void drawPlayerToMap(int mX, int mY, int mSize) {
    /*Get player's current position*/
    getViewPosition(&x, &y, &z);
    
-   /*printf("player - z,x = %f, %f \n", z, x);
-   printf("- z/100,x/100 = %f, %f \n", z/100, x/100);
-   printf("- msize-z/100,x/100 = %f, %f and msize = %d\n", z/100 * mSize, x/100*mSize, mSize);*/
    /*Convert the location to positive integer by:
     *1)Convert cord to a percentage
     *2)Multiple it by map size
@@ -101,10 +98,6 @@ void drawProjToMap(int mX, int mY, int mSize) {
       z = projectile[i][2];
 
       if (x >= 0 && y >= 0 && z >= 0) {
-         /*printf("projectile[%d] - z,x = %f, %f \n", i, z, x);
-         printf("- z/100,x/100 = %f, %f \n", z/100, x/100);
-         printf("- msize-z/100,x/100 = %f, %f and msize = %d\n", z/100 * mSize, x/100*mSize, mSize);
-         */
          /*Convert the location to positive integer by:
           *1)Convert cord to a percentage
           *2)Multiple it by map size
@@ -116,14 +109,6 @@ void drawProjToMap(int mX, int mY, int mSize) {
          /*Convert location to map*/
          newX = mX + pX;
          newY = mY + pY;
-         
-         // /*Convert the location to positive integer*/
-         // pX = (int)floor(z);
-         // pY = (int)floor(x);
-         
-         // /*Convert location to map*/
-         // newX = mX + pX * 2;
-         // newY = mY + pY * 2;
          
          /*Draw a square and center it to represent the projectile*/
          set2Dcolour(blue);

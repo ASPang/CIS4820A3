@@ -318,6 +318,24 @@ void draw2D() {
          drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
       }
       else if (displayMap == 2) {   //Large map in the middle
+         mSize = screenWidth * 0.5;
+      
+         int spaceBufWidth = (screenWidth - mSize) / 2;   //Map space buffer
+         int spaceBufHeight = (screenHeight - mSize) / 2;
+         
+         mX1 = spaceBufWidth;
+         mY1 = spaceBufHeight + mSize;
+         mX2 = spaceBufWidth + mSize;
+         mY2 = spaceBufHeight;
+         
+         /*Draw the projectile*/
+         drawProjToMap(mX1, mY2, mSize);
+         
+         /*Draw a square to indicate the player's location on the map*/
+         drawPlayerToMap(mX1, mY2, mSize);
+         
+         /*Draw the map area*/
+         drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
       }
    }
 }
