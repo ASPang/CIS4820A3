@@ -26,21 +26,30 @@ extern void getViewPosition(float *, float *, float *);
 extern int screenWidth, screenHeight;
 
 /*Draws the map area and its boarder*/
-void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize, int spaceBuf) {
+void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize) {
    int lineWidth = 5;   //Map boarder width
+   float mapBuf = 0.01;
    
    /*Colour Variables*/
    GLfloat black[] = {0.0, 0.0, 0.0, 0.8};
    GLfloat grey[] = {0.0, 0.0, 0.0, 0.5};
+   
+   /*Modify map with padding*/
+   mX1 -= screenWidth * mapBuf;
+   mX2 += screenWidth * mapBuf;
+   
+   mY1 += screenHeight * mapBuf;
+   mY2 -= screenHeight * mapBuf;
+   
       
    /*Draw lines to indicate the boundary of the map*/
    set2Dcolour(black);
    //draw2Dline(int x1, int y1, int x2, int y2, int lineWidth)
-   draw2Dline(mX1 - lineWidth, mY1, mX1 + (mSize - spaceBuf + lineWidth), mY1, lineWidth);   //Top boarder
-   draw2Dline(mX1 - lineWidth, mY2, mX1 + (mSize - spaceBuf + lineWidth), mY2, lineWidth);   //Bottom boarder
+   draw2Dline(mX1 - lineWidth, mY1, mX1 + (mX2 - mX1 + lineWidth), mY1, lineWidth);   //Top boarder
+   draw2Dline(mX1 - lineWidth, mY2, mX1 + (mX2 - mX1 + lineWidth), mY2, lineWidth);   //Bottom boarder
    
-   draw2Dline(mX1 - lineWidth/2, mY1, mX1 - lineWidth/2, mY1 - (mSize - spaceBuf), lineWidth);   //Left boarder
-   draw2Dline(mX2 + (lineWidth/2 + 1), mY1, mX2 + (lineWidth/2 + 1), mY1 - (mSize - spaceBuf), lineWidth);   //Right boarder
+   draw2Dline(mX1 - lineWidth/2, mY1, mX1 - lineWidth/2, mY1 + (mY2 - mY1), lineWidth);   //Left boarder
+   draw2Dline(mX2 + (lineWidth/2 + 1), mY1, mX2 + (lineWidth/2 + 1), mY1 + (mY2 - mY1), lineWidth);   //Right boarder
    
    /*Draw the map area**/
    set2Dcolour(grey);

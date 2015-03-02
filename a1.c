@@ -51,9 +51,9 @@ extern void convertProjNumDigit(char *);
 extern char ** splitNumMsgInfo(char *, int, int);
 
    /* Map Display Functions */
-void drawMapArea(int, int, int, int, int, int);
-void drawPlayerToMap(int, int, int);
-void drawProjToMap(int, int, int);
+extern void drawMapArea(int, int, int, int, int);
+extern void drawPlayerToMap(int, int, int);
+extern void drawProjToMap(int, int, int);
 
    /* Program Mode */
 char* gameMode = "";    //The game can be of one of two different states: -server or -client
@@ -293,14 +293,13 @@ void draw2D() {
       //int spaceBuf = 20;   //Map space buffer
       //int mSize = 200 + spaceBuf;  //Map size with a space buffer of 20
       
-      int spaceBuf = screenWidth * 0.01;   //Map space buffer
-      int mSize = screenWidth / 5 + spaceBuf;
+      int spaceBuf = screenWidth * 0.03;   //Map space buffer
+      int mSize = screenWidth * 0.2;
       
-   
-      int mX1 = screenWidth - mSize;
+      int mX1 = screenWidth - mSize - spaceBuf;
       int mY1 = screenHeight - spaceBuf;
       int mX2 = screenWidth - spaceBuf;
-      int mY2 = screenHeight - mSize;
+      int mY2 = screenHeight - mSize - spaceBuf;
             
             
       //printf("displayMap =  %d \n", displayMap);   //TESTING!!!!!!!!!!!!
@@ -315,7 +314,7 @@ void draw2D() {
          drawPlayerToMap(mX1, mY2, mSize);
          
          /*Draw the map area*/
-         drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
+         drawMapArea(mX1, mY1, mX2, mY2, mSize);
       }
       else if (displayMap == 2) {   //Large map in the middle
          mSize = screenWidth * 0.5;
@@ -335,7 +334,7 @@ void draw2D() {
          drawPlayerToMap(mX1, mY2, mSize);
          
          /*Draw the map area*/
-         drawMapArea(mX1, mY1, mX2, mY2, mSize, spaceBuf);
+         drawMapArea(mX1, mY1, mX2, mY2, mSize);
       }
    }
 }
