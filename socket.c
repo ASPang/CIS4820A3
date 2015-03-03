@@ -200,7 +200,7 @@ void sendProjectile(char *speedStr, char *angleStr) {
    int msgLen = 12;    //Might want to increment by one (13)
 
    char  msgStr[msgLen];
-
+    
    /*Inform the client that information being sent is viewPosition*/
    write(client_sockfd, &ch, 1);
      
@@ -425,6 +425,7 @@ void parseOrientPos(char *msg) {
     
     /*Set the client location based on the server's*/
     setViewOrientation(x, y, z);
+    setBarrelView();
     
     /*Free memory for array*/
     free(*msgSplit);

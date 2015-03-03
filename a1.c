@@ -462,7 +462,11 @@ void update() {
           if (strcmp(gameMode,"-server") == 0 && netServer == 1) {
                /*Write to socket*/
                writeSocket();
-          }         
+          }
+          else if (strcmp(gameMode,"-client") == 0 && netClient == 1) {
+              /*Force client to have barrel view*/
+              setBarrelView();
+          }
       }
    }
 }
