@@ -67,6 +67,7 @@ void writeSocket();
 void sendViewPos();
 void sendViewOrient();
 void sendProjectile(char *, char *);
+void sendAngleInfo(char *, char *);
 
 void convertPosNumDigit(char *);
 void convertOrientNumDigit(char *);
@@ -75,9 +76,12 @@ void readSocket();
 void parseViewPos(char *);
 void parseOrientPos(char *);
 void parseProjectInfo(char *);
+void parseAngleInfo(char *);
 
 void createClientProj(float , float );
 void convertProjNumDigit(char *);
+
+void setBarrelView();
 
 char ** splitNumMsgInfo(char *, int, int);
 
@@ -88,6 +92,9 @@ void drawProjToMap(int, int, int);
 
 void drawCordToMap(int, int, int );
 void convertPosForMap(char *);
+
+void drawMapCord(int, int, int, int);
+void addCordToMap(int, int, char *, int);
 
 //Thread Functions
 void *clientThread(void *);

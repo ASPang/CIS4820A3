@@ -42,7 +42,10 @@ void drawMapArea(int mX1, int mY1, int mX2, int mY2, int mSize) {
    
    mY1 += screenHeight * mapBuf;
    mY2 -= screenHeight * mapBuf;
-      
+   
+   /*Display Map coordinates*/
+   drawMapCord(mX1, mY1, mX2, mY2);
+   
    /*Draw lines to indicate the boundary of the map*/
    set2Dcolour(black);
    //draw2Dline(int x1, int y1, int x2, int y2, int lineWidth)
@@ -205,5 +208,31 @@ void convertPosForMap(char * str) {
         /*Replace old string with the new one*/
         strcpy(str, newStr);
     }
+}
+
+/*Draw the map coordinate*/
+void drawMapCord(int mX1, int mY1, int mX2, int mY2) {
+   int font = 4;
+   
+   addCordToMap(mX1, mY1 - 9, "(0,99)", 6);
+   addCordToMap(mX1, mY2 + 5, "(0,0)", 5);
+   addCordToMap(mX2 - font * 8, mY1 - 9, "(99,99)", 7);
+   addCordToMap(mX2 - font * 7, mY2 + 5, "(0,99)", 6);
+}
+
+void addCordToMap(int mX, int mY, char *str, int strLen) {   
+   int i = 0;  //Loop counter
+   
+   /*Set the text colour*/
+   GLfloat red[] = {0.5, 0.0, 0.0, 0.9};
+   set2Dcolour(red);
+   
+   /*Set text position*/
+   glRasterPos2i(mX, mY); 
+   
+   /*Display text to screen*/
+   for (i = 0; i < strLen; i++) {
+      glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_10, str[i]); 
+   }
 }
 

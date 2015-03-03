@@ -195,27 +195,52 @@ void sendViewOrient() {
 
 /*Send information about projectile fired*/
 void sendProjectile(char *speedStr, char *angleStr) {
-    char ch = 'M';
-    int cordLen = 6;
-    int msgLen = 12;    //Might want to increment by one (13)
-    
-    char  msgStr[msgLen];
-    
-    /*Inform the client that information being sent is viewPosition*/
-    write(client_sockfd, &ch, 1);
-        
-    /*Format string*/
-    convertProjNumDigit(speedStr);
-    convertProjNumDigit(angleStr);
-    
-    /*Concate the message*/
-    strcpy(msgStr,""); //Set up message
-    strcat(msgStr, speedStr);
-    strcat(msgStr, ",");
-    strcat(msgStr, angleStr);
-    
-    /*Send message to client*/
-    write(client_sockfd, &msgStr, msgLen);
+   char ch = 'M';
+   int cordLen = 6;
+   int msgLen = 12;    //Might want to increment by one (13)
+
+   char  msgStr[msgLen];
+
+   /*Inform the client that information being sent is viewPosition*/
+   write(client_sockfd, &ch, 1);
+     
+   /*Format string*/
+   convertProjNumDigit(speedStr);
+   convertProjNumDigit(angleStr);
+
+   /*Concate the message*/
+   strcpy(msgStr,""); //Set up message
+   strcat(msgStr, speedStr);
+   strcat(msgStr, ",");
+   strcat(msgStr, angleStr);
+
+   /*Send message to client*/
+   write(client_sockfd, &msgStr, msgLen);
+}
+
+/*Send information about projectiled fired*/
+void sendAngleInfo(char *speedStr, char *angleStr) {
+   char ch = 'A';
+   int cordLen = 6;
+   int msgLen = 12;    //Might want to increment by one (13)
+
+   char  msgStr[msgLen];
+
+   /*Inform the client that information being sent is viewPosition*/
+   write(client_sockfd, &ch, 1);
+     
+   /*Format string*/
+   convertProjNumDigit(speedStr);
+   convertProjNumDigit(angleStr);
+
+   /*Concate the message*/
+   strcpy(msgStr,""); //Set up message
+   strcat(msgStr, speedStr);
+   strcat(msgStr, ",");
+   strcat(msgStr, angleStr);
+
+   /*Send message to client*/
+   write(client_sockfd, &msgStr, msgLen);
 }
 
 /*Convert the three values into two digit string numbers - example 2 = "02" */
@@ -346,6 +371,16 @@ void readSocket() {
         /*Parse the projectile information*/
         parseProjectInfo(msg);
     }
+    else if (ch == 'A') {
+        int msgLen = 12;
+        char msg[msgLen];
+        
+        /*Get the message*/
+        read(sockfd, &msg, msgLen);
+        
+        /*Parse the projectile information*/
+        parseAngleInfo(msg);
+    }
 }
 
 /*Parse the view position sent from the server*/
@@ -428,32 +463,52 @@ void parseProjectInfo(char *msg) {
     setBarrelView();
 }
 
+/*Parse angle information when user sets a location*/
+void parseAngleInfo(char *msg) {
+   int numMsg = 3;
+   int msgLen = 10;
+
+   float speed = 0.0, angle = 0.0;
+
+   char ** msgSplit;
+
+   /*Parse the message to the three coordinates*/
+   msgSplit = splitNumMsgInfo(msg, numMsg, msgLen);
+
+   /*Convert string to an integer*/
+   speed = atof(msgSplit[0]);
+   angle = atof(msgSplit[1]);
+   
+   /*Free memory for array*/
+   free(*msgSplit);
+   free(msgSplit);
+
+   /*Save current gun view*/
+   barrelAngle = angle;
+   barrelSpeed = speed;
+
+   /*Change client to be the barrel view*/
+   setBarrelView();
+}
+
 /*Change the client view to be barrel*/
 void setBarrelView() {
-    float x, y, z;
-    float newAngle;
-    
-    /*Get the current client orientation*/
-    getViewOrientation(&x, &y, &z);
-    
-    /*Update current gun view*/
-    printf("current x and y %f, %f \n", x, y);
-    printf("barrow angle = %f \n", barrelAngle);
-    
-    /*Determine the current orientation*/
-    //curAngle = (int)x % 90;
-    
-    //printf("Current angle %d \n", curAngle);
-    
-    /*Set the client location based on the server's*/
-    if (barrelAngle == 0 && barrelSpeed == 0) {
-        newAngle = 440.0;
-    }
-    else {
-        newAngle = 360.0 - (float)barrelAngle;
-    }
-    
-    setViewOrientation(newAngle, y, z);
+   float x, y, z;
+   float newAngle;
+
+   /*Get the current client orientation*/
+   getViewOrientation(&x, &y, &z);
+
+   /*Set the client location based on the server's*/
+   if (barrelAngle == 0 && barrelSpeed == 0) {
+     newAngle = 440.0;
+   }
+   else {
+     newAngle = 380.0 - (float)barrelAngle;
+   }
+   
+   /*Update current gun view*/
+   setViewOrientation(newAngle, y, z);
 }
 
 /*Create new projectile in the client world*/

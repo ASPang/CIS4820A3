@@ -20,13 +20,12 @@
 
     /*Thread Functions*/
 extern void *clientThread(void *);
-extern void *serverThread(void *);
 
     /*Server Socket Variable**/
 extern int server_sockfd, client_sockfd;
-extern int server_len, client_len;
-extern struct sockaddr_in server_address;
-extern struct sockaddr_in client_address;
+//extern int server_len, client_len;
+//extern struct sockaddr_in server_address;
+//extern struct sockaddr_in client_address;
 
     /*Client Socket Variable*/
 extern int sockfd;
@@ -38,14 +37,15 @@ extern void openSocketServer();
 extern void openSocketClient();
 extern void writeSocket();
 
-    /*Server Send Message functions*/
+    /*Server Send Message functions
 extern void sendViewPos();
 extern void sendViewOrient();
+extern void sendAngleInfo(char *, char *);
 
 extern void convertPosNumDigit(char *);
-extern void convertOrientNumDigit(char *);
+extern void convertOrientNumDigit(char *);*/
 
-    /*Client Read Message Functions*/
+    /*Client Read Message Functions
 extern void readSocket();
 extern void parseViewPos(char *);
 extern void parseOrientPos(char *);
@@ -54,7 +54,7 @@ extern void parseProjectInfo(char *);
 extern void createClientProj(float , float );
 extern void convertProjNumDigit(char *);
 
-extern char ** splitNumMsgInfo(char *, int, int);
+extern char ** splitNumMsgInfo(char *, int, int);*/
 
    /* Map Display Functions */
 extern void drawMapArea(int, int, int, int, int);
@@ -811,6 +811,20 @@ void mouse(int button, int state, int x, int y) {
         
         /*Determine the angle*/
         angle = calAngle(oldMouPosY, y);
+        
+        /*Send the client of the new barrel angle*/       
+        if (netServer == 1) {
+           int cordLen = 6;
+           char speedStr[cordLen], angleStr[cordLen];
+          
+           sprintf(speedStr, "%f", speed);
+           sprintf(angleStr, "%f", angle);
+        
+           speedStr[5] = '\0';
+           angleStr[5] = '\0';
+                
+           sendAngleInfo(speedStr, angleStr);
+        }
         
         /*Inform the User of the new angle set*/
         printf("Set Angle = %0.2f and Speed =%0.2f\n ------\n", angle, speed);        
