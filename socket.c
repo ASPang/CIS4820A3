@@ -8,6 +8,9 @@
 
 #include "graphics.h"
 
+    /*Client Barrel View*/
+float barrelAngle = 0.0;
+
     /*Server Socket Variable*/
 int server_sockfd, client_sockfd;
 int server_len, client_len;
@@ -414,6 +417,27 @@ void parseProjectInfo(char *msg) {
     /*Free memory for array*/
     free(*msgSplit);
     free(msgSplit);
+    
+    /*Save current gun view*/
+    barrelAngle = angle;
+    
+    /*Change client to be the barrel view*/
+    //setBarrelView();
+}
+
+/*Change the client view to be barrel*/
+void setBarrelView() {
+    float x, y, z;
+    
+    /*Get the current client orientation*/
+    getViewOrientation(&x, &y, &z);
+    
+    /*Update current gun view*/
+    printf("current x and y %f, %f \n", x, y);
+    printf("barrow angle = %f \n", barrelAngle);
+    
+    /*Set the client location based on the server's*/
+    setViewOrientation(x, y, z);    
 }
 
 /*Create new projectile in the client world*/

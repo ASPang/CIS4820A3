@@ -289,7 +289,7 @@ void draw2D() {
       GLfloat black[] = {0.0, 0.0, 0.0, 0.5};
       set2Dcolour(black);
       draw2Dbox(500, 380, 524, 388);
-   } else if (testWorld) {
+   } else {
 
 	/* your code goes here */      
       int spaceBuf = screenWidth * 0.03;   //Map space buffer
