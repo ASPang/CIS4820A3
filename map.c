@@ -5,6 +5,8 @@
 
 #include "graphics.h"
 
+extern int netClient;
+
 	/* 2D drawing functions */
 extern void  draw2Dline(int, int, int, int, int);
 extern void  draw2Dbox(int, int, int, int);
@@ -64,7 +66,7 @@ void drawPlayerToMap(int mX, int mY, int mSize) {
    
    /*Colour Variable*/
    GLfloat green[] = {0.0, 0.5, 0.0, 0.5};
-   //printf("Player - mX=%d, mY=%d, \n", mX, mY);
+    
    /*Get player's current position*/
    getViewPosition(&x, &y, &z);
     //printf("Player - x, y, z - %f, %f, %f \n", x, y, z);
@@ -75,18 +77,17 @@ void drawPlayerToMap(int mX, int mY, int mSize) {
     */
    pX = (int)floor(z/100 * mSize) * -1;
    pY = (int)floor(x/100 * mSize) * -1;
-   //printf("Player - pX=%d, pY=%d, \n", pX, pY);
+    
    /*Convert location to map*/
    mX += pX;
    mY += pY;
-   //printf("Player - mX=%d, mY=%d, \n", mX, mY);
+    
    /*Display player's current location on the map*/
    drawCordToMap(mX, mY, pSize);
-   //printf("after drawing to map\n");
+    
    /*Create a 20x20 pixel square and center it to represent the player*/
    set2Dcolour(green);
    draw2Dbox(mX - pSize, mY - pSize, mX + pSize, mY + pSize); //int x1, int y1, int x2, int y2
-    //printf("JDFLSJDLFJSLKFDLSJFD\n");
 }
 
 /*Draw any projectiles to the map*/
@@ -102,12 +103,11 @@ void drawProjToMap(int mX, int mY, int mSize) {
    GLfloat blue[] = {0.0, 0.0, 0.5, 0.8};
       
    /*Go through all the projectiles*/   
-   for (i = 0; i < 10; i++) {
-       //printf("HERE i at %d \n", i);
+   for (i = 0; i < 10; i++) {      
       /*Get current projectile position*/
       x = projectile[i][0];
       z = projectile[i][2];
-       //printf("HERE x and z %f, %f \n", x, z);
+       
       if (x >= 0) {
          /*Convert the location to positive integer by:
           *1)Convert cord to a percentage
@@ -126,7 +126,6 @@ void drawProjToMap(int mX, int mY, int mSize) {
          draw2Dbox(newX - pSize, newY - pSize, newX + pSize, newY + pSize); //int x1, int y1, int x2, int y2
       }            
    }
-    //printf("HERE - done \n");
 }
 
 /*Display the Player's current position*/
@@ -148,32 +147,24 @@ void drawCordToMap(int mX, int mY, int pSize) {
    x = x * -1;
    y = y * -1;
    z = z * -1;
-    //printf("drawCordMap - x,y,z - %f,%f,%f \n", x, y, z);
+    
    /*Convert coordinates to a string*/
    sprintf(strX, "%f", x);    
    sprintf(strY, "%f", y);    
    sprintf(strZ, "%f", z);
-    //printf("1.sizeof(strX) = %d", (int)sizeof(strX));
     
-   //printf("drawCordMap - strX[cordLen], strY[cordLen], strZ[cordLen] - %s,%s,%s \n", strX, strY, strZ);
    /*Trimming the decimal place down to two*/
    strX[5] = '\0';
    strY[5] = '\0';
    strZ[5] = '\0';
-   //printf("2.sizeof(strX) = %d", (int)sizeof(strX));
-    //printf("");
-    //printf(" ");
-    fflush(stdout);
-    //setbuf(stdout, NULL);
     
-    //printf("drawCordMap - strX[cordLen], strY[cordLen], strZ[cordLen] - %s,%s,%s \n", strX, strY, strZ);
+   fflush(stdout);
+    
    /*Convert the three values into two digit string numbers - example 2 = "02" */
    convertPosForMap(strX);
    convertPosForMap(strY);
    convertPosForMap(strZ);
-    //printf("drawCordMap - strX[cordLen], strY[cordLen], strZ[cordLen] - %s,%s,%s \n", strX, strY, strZ);
-    //printf("sizeof(strX) = %d", (int)sizeof(strX));
-    
+        
    /*Concate the message*/
    strcpy(cordStr,"("); //Set up message
    strcat(cordStr, strX);

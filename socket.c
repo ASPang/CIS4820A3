@@ -10,6 +10,7 @@
 
     /*Client Barrel View*/
 float barrelAngle = 0.0;
+float barrelSpeed = 0.0;
 
     /*Server Socket Variable*/
 int server_sockfd, client_sockfd;
@@ -311,6 +312,7 @@ void readSocket() {
     char ch;
     
     read(sockfd, &ch, 1);
+    //printf("%c, ",ch);
     
     if (ch == 'P') {
         int msgLen = 34;
@@ -420,14 +422,16 @@ void parseProjectInfo(char *msg) {
     
     /*Save current gun view*/
     barrelAngle = angle;
+    barrelSpeed = speed;
     
     /*Change client to be the barrel view*/
-    //setBarrelView();
+    setBarrelView();
 }
 
 /*Change the client view to be barrel*/
 void setBarrelView() {
     float x, y, z;
+    float newAngle;
     
     /*Get the current client orientation*/
     getViewOrientation(&x, &y, &z);
@@ -436,8 +440,20 @@ void setBarrelView() {
     printf("current x and y %f, %f \n", x, y);
     printf("barrow angle = %f \n", barrelAngle);
     
+    /*Determine the current orientation*/
+    //curAngle = (int)x % 90;
+    
+    //printf("Current angle %d \n", curAngle);
+    
     /*Set the client location based on the server's*/
-    setViewOrientation(x, y, z);    
+    if (barrelAngle == 0 && barrelSpeed == 0) {
+        newAngle = 440.0;
+    }
+    else {
+        newAngle = 360.0 - (float)barrelAngle;
+    }
+    
+    setViewOrientation(newAngle, y, z);
 }
 
 /*Create new projectile in the client world*/
