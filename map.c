@@ -104,10 +104,9 @@ void drawProjToMap(int mX, int mY, int mSize) {
    for (i = 0; i < 10; i++) {
       /*Get current projectile position*/
       x = projectile[i][0];
-      y = projectile[i][1];
       z = projectile[i][2];
 
-      if (x >= 0 && y >= 0 && z >= 0) {
+      if (x >= 0 && z >= 0) {
          /*Convert the location to positive integer by:
           *1)Convert cord to a percentage
           *2)Multiple it by map size

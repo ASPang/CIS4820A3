@@ -289,7 +289,7 @@ void draw2D() {
       GLfloat black[] = {0.0, 0.0, 0.0, 0.5};
       set2Dcolour(black);
       draw2Dbox(500, 380, 524, 388);
-   } else {
+   } else if (testWorld) {
 
 	/* your code goes here */      
       int spaceBuf = screenWidth * 0.03;   //Map space buffer
@@ -448,7 +448,7 @@ void update() {
       /* your code goes here */
           /*Move the clouds*/
           moveCloud();
-
+          
           /*Update the projectile*/
           moveProjectile();
           objectCollision();
@@ -547,14 +547,14 @@ void updateProjectiles() {
    float dx, dz, dy, angleX, angleY;
    float xPos, yPos, zPos;
    float speed, height, gravity;
-
+    
    for (i = 0; i < 10; i++) {
       /*Get current projectile position*/
       xPos = projectile[i][0];
       yPos = projectile[i][1];
       zPos = projectile[i][2];
 
-      if (xPos >= 0) {
+      if (xPos >= 0 && zPos >= 0) {
          /*Update mob position - height*/        
          angleY = projectile[i][7];
          speed = projectile[i][8];
@@ -771,14 +771,14 @@ void mouse(int button, int state, int x, int y) {
         projectile[projNum][9] = 0.0;
         
         /*Determine the number of projectiles in the world*/
-        if (projNumber + 1 > 9) {
+        if (projNumber + 1 >= 9) {
             projNumber = 0;
         }
         else {
             projNumber++;   //Increase projectile number
         }
         
-        /*Send the client of the new projectile*/        
+        /*Send the client of the new projectile*/       
         if (netServer == 1) {
            int cordLen = 6;
            char speedStr[cordLen], angleStr[cordLen];
@@ -947,8 +947,8 @@ int i, j, k;
       int seedLen = 6;
       char seed[seedLen];
        
-      srand(time(NULL));
-      landSeed = (rand() % landSeed) + 400000;
+      /*srand(time(NULL));
+      landSeed = (rand() % landSeed) + 400000;*/
                
       if (argc > 1) { 
          /*Determine if the program is a server or client*/

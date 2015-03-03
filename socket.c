@@ -305,7 +305,7 @@ void convertProjNumDigit(char * str) {
 
 /*Read the message from the socket sent by the server*/
 void readSocket() {
-    char ch = 'A';
+    char ch;
     
     read(sockfd, &ch, 1);
     
