@@ -496,7 +496,8 @@ void parseAngleInfo(char *msg) {
 void setBarrelView() {
    float x, y, z;
    float newAngle;
-
+   float xPos, yPos, zPos;
+    
    /*Get the current client orientation*/
    getViewOrientation(&x, &y, &z);
 

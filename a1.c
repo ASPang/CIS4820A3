@@ -965,8 +965,8 @@ int i, j, k;
       int seedLen = 6;
       char seed[seedLen];
        
-      /*srand(time(NULL));
-      landSeed = (rand() % landSeed) + 400000;*/
+      srand(time(NULL));
+      landSeed = (rand() % landSeed) + 400000;
                
       if (argc > 1) { 
          /*Determine if the program is a server or client*/
