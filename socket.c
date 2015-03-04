@@ -336,8 +336,8 @@ void convertProjNumDigit(char * str) {
 void readSocket() {
     char ch;
     
-    read(sockfd, &ch, 1);
-    //printf("%c, ",ch);
+    read(sockfd, &ch, 1);    
+    fflush(stdout);    //Clear socket buffer
     
     if (ch == 'P') {
         int msgLen = 34;
@@ -345,9 +345,11 @@ void readSocket() {
         
         /*Get the message*/
         read(sockfd, &msg, msgLen);
-                
-        /*Set position to be same as server*/
-        parseViewPos(msg);
+        
+        if (msg[9] == ',' && msg[19] == ',' ) {
+           /*Set position to be same as server*/
+           parseViewPos(msg);
+        }
         
     }
     else if (ch == 'O') {
@@ -357,8 +359,10 @@ void readSocket() {
         /*Get the message*/
         read(sockfd, &msg, msgLen);
         
-        /*Parse the orientation information from the server*/
-        parseOrientPos(msg);
+        if (msg[12] == ',' && msg[6] == '.') {
+           /*Parse the orientation information from the server*/
+           parseOrientPos(msg);
+        }
         
     }
     else if (ch == 'M') {
@@ -368,8 +372,10 @@ void readSocket() {
         /*Get the message*/
         read(sockfd, &msg, msgLen);
         
-        /*Parse the projectile information*/
-        parseProjectInfo(msg);
+        if (msg[2] == '.' && msg[6] == ',') {
+           /*Parse the projectile information*/
+           parseProjectInfo(msg);
+        }
     }
     else if (ch == 'A') {
         int msgLen = 12;
@@ -378,9 +384,12 @@ void readSocket() {
         /*Get the message*/
         read(sockfd, &msg, msgLen);
         
-        /*Parse the projectile information*/
-        parseAngleInfo(msg);
+        if (msg[2] == '.' && msg[6] == ',') {
+           /*Parse the projectile information*/
+           parseAngleInfo(msg);
+        }
     }
+   
 }
 
 /*Parse the view position sent from the server*/
